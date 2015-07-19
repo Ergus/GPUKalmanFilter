@@ -5,7 +5,7 @@
  */
 
 #include "Bad.h"
-
+#include "Serializer.h"
 
 namespace {
 /// Helper function to filter one hits
@@ -137,10 +137,13 @@ Run::Run(const char fn[])
             
     rewind(fp);
 
-    m_events.reserve(nbevts);
+    m_allstates=vector<States> (nbevts);
     
-    int hpt, ign1, ign2;
-    float x,y,z,wxerr,wyerr;
+    sum2.reserve(nbevts);
+    backward.reserve(nbevts);
+    
+    int hpt, ign1, read_backward;
+    float x,y,z,wxerr,wyerr,read_sum2;
 
     while(getline(&line,&len,fp) != -1){
         const char val=line[0];
@@ -148,20 +151,28 @@ Run::Run(const char fn[])
         // but only for to be sure when debugging
         if (isalpha(val)){ 
             if(val=='T'){
-                fscanf(fp,"Hits: %d",&hpt);
+                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",
+                       &read_sum2,&read_backward,&hpt);
+                sum2.back().push_back(read_sum2);
+                backward.back().push_back(read_backward);
                 PrPixelTrack tmptrack(hpt);
                 m_events.back().addTrack(tmptrack);
-                auto lasttrack=&(m_events.back().tracks().back());
+                auto lasttr=&(m_events.back().tracks().back());
                 for(int i=0;i<hpt;i++){
                     fscanf(fp,"%f %f %f %*f %*f %f %f %*d %*d",
                                &x,&y,&z,&wxerr,&wyerr);
                     PrPixelHit tmphit(x,y,z,wxerr,wyerr);
-                    lasttrack->addHit(tmphit);
+                    lasttr->addHit(tmphit);
                     }
                 }
             else if(val=='E') {
                 Event tmpevt;
                 addEvent(tmpevt);
+                m_events.back().tracks().reserve(100);
+                sum2.push_back(vector<float>());
+                sum2.back().reserve(100);
+                backward.push_back(vector<bool>());
+                backward.back().reserve(100);
                 }
             }
         }
@@ -172,16 +183,31 @@ Run::Run(const char fn[])
 
 void Run::print(){
     /// The print function is used only when -DDEBUG is defined
-    int evt=0, track;
-    for(auto i : m_events){
-        track=0;
-        printf("Event: %d, Tracks: %d\n", evt++, i.size());
-        for(auto j : i.tracks()){
-            printf("Track: %d\n", track++);
-            printf("Hits: %d\n", j.size());
-            for(auto k : j.hits()){
-                k.print();
-                }
+    int nbev=m_events.size(), nbtr, nbht;
+    for(int i=0;i<nbev;i++){
+        nbtr=m_events[i].size();
+        printf("Event: %d, Tracks: %d\n", i, nbtr);
+        for(int j=0;j<nbtr;j++){
+            auto tmp=m_events[i].tracks()[j].hits();
+            nbht=tmp.size();
+            printf("Track: %d, Sum2: %.8g, Backward: %d, Hits: %d\n",
+                   j, sum2[i][j], int(backward[i][j]), nbht);
+            
+            for(int k=0;k<nbht;k++) tmp[k].print();
+            }
+        }    
+    }
+
+void Run::filterall(){
+    int nbev=m_events.size(), nbtr;
+    for(int i=0;i<nbev;i++){
+        nbtr=m_events[i].size();
+        for(int j=0;j<nbtr;j++){            
+            State mystate;
+            m_events[i].tracks()[j].fitKalman(mystate, backward[i][j] ? 1:-1, sum2[i][j]);
+            m_allstates[i].push_back(mystate);   
+      
             }
         }
     }
+

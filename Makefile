@@ -20,7 +20,7 @@ bad.x: main.cc $(libs)
 
 .PHONY: clean
 clean:
-	rm -rf *.x *.o
+	rm -rf *.x *.o *.txt
 
 .PHONY: test
 test: $(file)

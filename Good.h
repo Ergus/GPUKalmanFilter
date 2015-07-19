@@ -8,6 +8,8 @@ class sizes{
         ~sizes();
         void print();
         float *x,*y,*z,*wxerr,*wyerr;
+        float *sum2;  //This is only 1 vale per track
+        bool *backward;
         int *event_start, *tracks_start;
         
 

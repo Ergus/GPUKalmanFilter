@@ -39,7 +39,10 @@ sizes::sizes(const char fn[]):
 
     event_start=(int*) malloc((nbevts+1)*sizeof(int));
     tracks_start=(int*) malloc((nbtracks+1)*sizeof(int));
-    int ih=0, it=0, ie=0, hpt, ign1, ign2;
+    sum2=(float*) malloc(nbtracks*sizeof(float));
+    backward=(bool*) malloc(nbtracks*sizeof(bool));
+    
+    int ih=0, it=0, ie=0, hpt;
     while(getline(&line,&len,fp) != -1){
         const char val=line[0];
         // This next IF is not really needed,
@@ -47,13 +50,13 @@ sizes::sizes(const char fn[]):
         if (isalpha(val)){ 
             if(val=='T'){
                 tracks_start[it]=ih;
-                fscanf(fp,"Hits: %d",&hpt);
+                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",
+                       &sum2[it],&backward[it],&hpt);
                 for(int i=0;i<hpt;i++,ih++){
                     fscanf(fp,
-                           "%f %f %f %*f %*f %f %f %d %d",
+                           "%f %f %f %*f %*f %f %f %*d %*d",
                            &x[ih],&y[ih],&z[ih],
-                           &wxerr[ih],&wyerr[ih],
-                           &ign1,&ign2);
+                           &wxerr[ih],&wyerr[ih]);
                     }
                 it++;
                 }
@@ -72,6 +75,7 @@ sizes::~sizes(){
     free(full);
     free(event_start);
     free(tracks_start);
+    free(sum2);
     }
 
 void sizes::print(){
@@ -84,8 +88,8 @@ void sizes::print(){
         for(int j=evstart,cont=0;j<evtend;j++,cont++){
             int trstart=tracks_start[j],
                 trend=tracks_start[j+1];
-            printf("Track: %d\n",cont);
-            printf("Hits: %d\n",trend-trstart);
+            printf("Track: %d, Sum2: %g, Backward: %d, Hits: %d\n",
+                   cont,sum2[j],backward[j],trend-trstart);
             for(int ih=trstart;ih<trend;ih++){
                 printf("%f %f %f %f %f\n",
                        x[ih],y[ih],z[ih],

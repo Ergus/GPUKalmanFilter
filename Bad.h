@@ -14,15 +14,14 @@
 #include <ctype.h>
 #include <vector>
 
+class Serializer;
 
+using namespace std;
 //============ Covariance =============
 class Covariance{
     public:
         Covariance(){};
         ~Covariance(){};
-        const double& operator()(int i, int j) const{
-            return m_cov[i][j];
-            };
         double& operator()(int i, int j){
             return m_cov[i][j];
             };
@@ -37,7 +36,7 @@ class State{
     public:
         State(){};
         ~State(){};
-        Covariance covariance(){return m_covariance;}
+        Covariance& covariance(){return m_covariance;}
         float x(){return m_x;}
         float y(){return m_y;}
         float z(){return m_z;}                
@@ -53,6 +52,7 @@ class State{
         float m_x,m_y,m_z, m_tx, m_ty;
         Covariance m_covariance;
     };
+    typedef std::vector<State> States;
 
 //========= End State ============
 //============ Hits ==============
@@ -87,7 +87,7 @@ class PrPixelHit {
         float wxerr() const { return m_wxerr; }
         float wyerr() const { return m_wyerr; }
         void print(){
-            printf("%f %f %f %f %f\n",
+            printf("%.8f %.8f %.8f %.8f %.8f\n",
                    m_x,m_y,m_z,m_wxerr,m_wyerr);
             }        
         
@@ -169,11 +169,17 @@ class Run{
         unsigned int size(void) const {
             return m_events.size();}        
         void print();
+        void filterall();
     private:
         FILE *fp;
         int nbevts, nbtracks, nbhits;
         Events m_events;
+        vector<States> m_allstates;
+        vector<vector<float> > sum2;
+        vector<vector<bool> > backward;
+        friend Serializer;
     };
+
 //============= End Run ===============
 
 #endif
