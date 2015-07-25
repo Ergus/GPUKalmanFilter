@@ -149,7 +149,7 @@ Run::Run(const char fn[])
         const char val=line[0];
         // This next IF is not really needed,
         // but only for to be sure when debugging
-        if (isalpha(val)){ 
+        if (isalpha(val)){
             if(val=='T'){
                 sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",
                        &read_sum2,&read_backward,&hpt);
@@ -195,7 +195,7 @@ void Run::print(){
             
             for(int k=0;k<nbht;k++) tmp[k].print();
             }
-        }    
+        }
     }
 
 void Run::filterall(){

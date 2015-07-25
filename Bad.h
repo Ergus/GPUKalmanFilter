@@ -1,10 +1,11 @@
-/*..ooOOO0000OOOoo......ooOOO0000OOOoo......ooOOO0000OOOoo...*\
+/*...ooOOO0000OOOoo......ooOOO0000OOOoo......ooOOO0000OOOoo...*\
  *
  * This is for to make a better benchmark for the Kallman filter 
  * using tha same system is implemented now in Gaudi. 
- * The code is copied and modifies for to run in an independient way out of gaudi.
+ * The code is copied and modifies for to run in an independient 
+ * way out of gaudi.
  *
- \*...ooOOO0000OOOoo......ooOOO0000OOOoo......ooOOO0000OOOoo...*/
+\*...ooOOO0000OOOoo......ooOOO0000OOOoo......ooOOO0000OOOoo...*/
 
 #ifndef BAD_H
 #define BAD_H 1
@@ -13,48 +14,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <vector>
+#include "State.h"
 
 class Serializer;
 
-using namespace std;
-//============ Covariance =============
-class Covariance{
-    public:
-        Covariance(){};
-        ~Covariance(){};
-        double& operator()(int i, int j){
-            return m_cov[i][j];
-            };
-
-    private:
-        double m_cov[5][5]={};
-    };
-
-//======= End Covariance =========
-//============ State =============
-class State{
-    public:
-        State(){};
-        ~State(){};
-        Covariance& covariance(){return m_covariance;}
-        float x(){return m_x;}
-        float y(){return m_y;}
-        float z(){return m_z;}                
-        float tx(){return m_tx;}
-        float ty(){return m_ty;}        
-        void setX(float x){m_x=x;}
-        void setY(float x){m_y=x;}
-        void setZ(float x){m_z=x;}
-        void setTx(float x){m_tx=x;}
-        void setTy(float x){m_ty=x;}        
-        
-    private:
-        float m_x,m_y,m_z, m_tx, m_ty;
-        Covariance m_covariance;
-    };
-    typedef std::vector<State> States;
-
-//========= End State ============
 //============ Hits ==============
 
 class PrPixelHit {
