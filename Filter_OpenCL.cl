@@ -47,13 +47,17 @@ __kernel void Kalman_Filter(__constant float* ttrack,
         last = trstart[idx+1]-1,
         direction = (backward[idx] ? 1 : -1),
         dhit= +1;
+
+    float ax[24],ay[24],az[24],aerrx[24],aerry[24];
+
+    for(int i=first, j=0;i<=last;i++, j++){
+        ax[j]   = fullin[i];
+        ay[j]   = fullin[i+hits];
+        az[j]   = fullin[i+2*hits];
+        aerrx[j]= fullin[i+3*hits];
+        aerry[j]= fullin[i+4*hits];        
+        }
     
-    __global float* __private ax   =&fullin[first];
-    __global float* __private ay   =&fullin[first+hits];
-    __global float* __private az   =&fullin[first+2*hits];
-    __global float* __private aerrx=&fullin[first+3*hits];
-    __global float* __private aerry=&fullin[first+4*hits];
-    __global float* __private state=&fullout[11*idx];
     
     if((az[last]-az[first])*direction<0){
         dhit=-1;
@@ -106,18 +110,19 @@ __kernel void Kalman_Filter(__constant float* ttrack,
     covTyTy += noise2PerLayer;
 
     // finally, fill the state
-    state[0]=x;
-    state[1]=y;
-    state[2]=z;
-    state[3]=tx;
-    state[4]=ty;
-    
-    state[5] = covXX;
-    state[6] = covXTx;
-    state[7] = covTxTx;
-    state[8] = covYY;
-    state[9] = covYTy;
-    state[10]= covTyTy;
+    int tmp=11*idx;
+    fullout[tmp+0]=x;
+    fullout[tmp+1]=y;
+    fullout[tmp+2]=z;
+    fullout[tmp+3]=tx;
+    fullout[tmp+4]=ty;
+
+    fullout[tmp+5] = covXX;
+    fullout[tmp+6] = covXTx;
+    fullout[tmp+7] = covTxTx;
+    fullout[tmp+8] = covYY;
+    fullout[tmp+9] = covYTy;
+    fullout[tmp+10]= covTyTy;
     
     }
 

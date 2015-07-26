@@ -152,7 +152,7 @@ float clFilter(int *evstart,
         };
     
     // Create a command queue
-    queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    queue = clCreateCommandQueue(context, device, 0, &err);
     if(err < 0) {
         perror("Couldn't create a command queue");
         exit(1);   
