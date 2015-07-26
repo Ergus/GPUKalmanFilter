@@ -6,7 +6,9 @@
     #include "Bad.h"
 #endif
 
+#ifdef UOCL
 #include "Filter_OpenCL.h"
+#endif
 
 int main(int argc, char **argv){
     if(argc<2){
@@ -19,6 +21,10 @@ int main(int argc, char **argv){
 #ifdef GOOD
     sizes size(argv[1]);
     printf("Good memory test\n");
+    #ifdef UOCL
+    printf("Filtering with OpenCL\n");
+    size.Filter_OpenCL();
+    #endif
     
 #elif defined(BAD)
     Run run(argv[1]);

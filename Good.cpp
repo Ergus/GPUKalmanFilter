@@ -1,6 +1,5 @@
 #include "Good.h"
 
-
 sizes::sizes(const char fn[]):
     ///
     nbevts(0),
@@ -118,3 +117,18 @@ void sizes::print(){
         }
     }
 
+#ifdef UOCL
+float sizes::Filter_OpenCL(){
+            return clFilter(event_start,
+                            tracks_start,
+                            fullstate,
+                            full,
+                            backward,
+                            sum2,
+                            stateout,
+                            nbevts,
+                            nbtracks,
+                            nbhits
+                            );
+            }
+#endif

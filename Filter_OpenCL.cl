@@ -40,7 +40,9 @@ __kernel void Kalman_Filter(__constant float* ttrack,
 
     //Declared before because it is the most important var
     const int idx = get_global_id(0);
-
+    
+    if(idx>=tracks) return;
+    
     int first = trstart[idx],
         last = trstart[idx+1]-1,
         direction = (backward[idx] ? 1 : -1),

@@ -6,8 +6,8 @@
 #include <ctype.h>
 
 #ifdef UOCL
-#include <Filter_OpenCL.h>
-#endif
+#include "Filter_OpenCL.h"
+#endif 
 
 class sizes{
     public:
@@ -15,19 +15,7 @@ class sizes{
         ~sizes();
         void print();
         #ifdef UOCL
-        float Filter_OpenCL(){
-            return clFilter(event_start,
-                            tracks_start,
-                            fullstate,
-                            fullin,
-                            backward,
-                            sum2,
-                            stateout,
-                            nbevts,
-                            nbtracks,
-                            nbhits
-                            );
-            }
+        float Filter_OpenCL();
         #endif
         
         //Hits information, only the pointers
