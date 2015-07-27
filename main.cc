@@ -21,10 +21,7 @@ int main(int argc, char **argv){
 #ifdef GOOD
     sizes size(argv[1]);
     printf("Good memory test\n");
-    #ifdef UOCL
-    printf("Filtering with OpenCL\n");
-    size.Filter_OpenCL();
-    #endif
+    size.fitKalman();
     size.save_results();
     
 #elif defined(BAD)

@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <vector>
 #include "State.h"
+#include "Filter.h"
 
 class Serializer;
 

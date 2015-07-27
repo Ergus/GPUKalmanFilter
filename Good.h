@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "Filter.h"
 
 #ifdef UOCL
 #include "Filter_OpenCL.h"
@@ -18,10 +19,7 @@ class sizes{
         ~sizes();
         void print();
         void save_results();
-        
-        #ifdef UOCL
-        float Filter_OpenCL();
-        #endif
+        float fitKalman();        
         
         //Hits information, only the pointers
         float *x,*y,*z,*wxerr,*wyerr;

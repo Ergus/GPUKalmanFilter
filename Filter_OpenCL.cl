@@ -39,18 +39,18 @@ __kernel void Kalman_Filter(__constant float* ttrack,
                             const unsigned int hits){
 
     //Declared before because it is the most important var
-    private const int idx = get_global_id(0);
+    const int idx = get_global_id(0);
     
     if(idx>=tracks) return;
     
-    private int first = trstart[idx],
+    int first = trstart[idx],
         last = trstart[idx+1],
         direction = (backward[idx] ? 1 : -1),
         dhit, size=last-first-1;
-    private const float noise2PerLayer=sum2[idx];
+    const float noise2PerLayer=sum2[idx];
     
-    private float ax[24],ay[24],
-                  az[24],aerrx[24],aerry[24];
+    float ax[24],ay[24],
+        az[24],aerrx[24],aerry[24];
 
     for(int i=first, j=0;i<last;i++, j++){
         ax[j]   = fullin[i];
@@ -71,7 +71,7 @@ __kernel void Kalman_Filter(__constant float* ttrack,
         first=0;
         }
     
-    private float x = ax[first],
+    float x = ax[first],
         tx = ttrack[idx],
          y = ay[first],
         ty = ttrack[idx+tracks],
@@ -80,17 +80,15 @@ __kernel void Kalman_Filter(__constant float* ttrack,
         wy = aerry[first];
     
     // initialize the covariance matrix
-    private float covXTx  = 0.0f;  // no initial correlation
-    private float covYTy  = 0.0f;
-    private float covTxTx = 1.0f;  // randomly large error
-    private float covTyTy = 1.0f;
-    private float covXX = 1.0f /(wx*wx);
-    private float covYY = 1.0f /(wy*wy);
+    float covXTx  = 0.0f;  // no initial correlation
+    float covYTy  = 0.0f;
+    float covTxTx = 1.0f;  // randomly large error
+    float covTyTy = 1.0f;
+    float covXX = 1.0f /(wx*wx);
+    float covYY = 1.0f /(wy*wy);
+    float chi2=0.0f;
     
-    private float chi2=0.0f;
-    
-    for (int i=first+dhit; i!=last; i+=dhit) {
-        
+    for (int i=first+dhit; i!=last; i+=dhit) {    
         wx=aerrx[i];
         wy=aerry[i];
         covTxTx+=noise2PerLayer;

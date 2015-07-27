@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 CXX = g++
 CXXFLAGS = -O3 -std=c++11
 
@@ -54,7 +56,7 @@ bad.x: main.cc $(libs)
 opencl.x: main.cc Good.cpp Filter_OpenCL.o
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
 
-%.o: %.cpp
+%.o: %.cpp Filter.o
 	$(CXX) $(CXXFLAGS) -c $^ -o $@
 
 .PHONY: clean
@@ -65,3 +67,11 @@ clean:
 test: $(file)
 	for a in $(file); do ./$$a test.dat; done
 
+.PHONY: check
+check: $(file)
+	rm -rf *.txt
+	./opencl.x test.dat
+	./bad.x test.dat
+	./good.x test.dat
+	diff Opencl_states.txt Bad_states.txt
+	diff Good_states.txt Bad_states.txt

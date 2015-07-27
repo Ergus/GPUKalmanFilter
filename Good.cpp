@@ -132,21 +132,86 @@ void sizes::save_results(){
     }
 
 #ifdef UOCL
-float sizes::Filter_OpenCL(){
-            return clFilter(event_start,
-                            tracks_start,
-                            statein,
-                            full,
-                            backward,
-                            sum2,
-                            stateout,
-                            nbevts,
-                            nbtracks,
-                            nbhits
-                            );
+float sizes::fitKalman(){
+    printf("Filter with OpenCL\n");
+    return clFilter(event_start,
+                    tracks_start,
+                    statein,
+                    full,
+                    backward,
+                    sum2,
+                    stateout,
+                    nbevts,
+                    nbtracks,
+                    nbhits
+                    );
+    }
+#else
+float sizes::fitKalman(){
+    printf("Filter with Good method\n");    
+    for(int i=0;i<nbevts;i++){
+        int evstart=event_start[i],
+            evtend =event_start[i+1];
+        for(int j=evstart,cont=0;j<evtend;j++,cont++){
+            int trstart=tracks_start[j],
+                trend=tracks_start[j+1]-1,
+                direction=(backward[j]?1:-1),
+                size=trend-trstart,
+                dhit=1;
+            const float noise2PerLayer=sum2[j];
+            
+            if((z[trend]-z[trstart])*direction<0){
+                float tmp=trstart;                
+                dhit=-1;
+                trstart=trend;
+                trend=tmp;
+                }
+            float lx = x[trstart],
+                 ltx = statein[j],
+                  ly = y[trstart],
+                 lty = statein[j+nbtracks],
+                  lz = z[trstart],
+                 lwx = wxerr[trstart],
+                 lwy = wyerr[trstart];
+            // initialize the covariance matrix
+            float covXTx  = 0.0f;  //no initial correlation
+            float covYTy  = 0.0f;
+            float covTxTx = 1.0f;  // randomly large error
+            float covTyTy = 1.0f;
+            float covXX = 1.0f /(lwx*lwx);
+            float covYY = 1.0f /(lwy*lwy);
+            float chi2=0.0f;
+            
+            for (int k=trstart+dhit;k!=trend+dhit;k+=dhit){
+                lwx=wxerr[k];
+                lwy=wyerr[k];
+                covTxTx+=noise2PerLayer;
+                covTyTy+=noise2PerLayer;
 
+                // filter X
+                chi2 += filter(lz,lx,ltx,covXX,covXTx,covTxTx,z[k], x[k], lwx*lwx);
+                // filter Y
+                chi2 += filter(lz,ly,lty,covYY,covYTy,covTyTy,z[k], y[k], lwy*lwy);
+                lz=z[k];
+                }
+            
+            covTxTx += noise2PerLayer;
+            covTyTy += noise2PerLayer;
 
+            int tmp=11*j;
+            stateout[tmp+0]=lx;
+            stateout[tmp+1]=ly;
+            stateout[tmp+2]=lz;
+            stateout[tmp+3]=ltx;
+            stateout[tmp+4]=lty;
+
+            stateout[tmp+5] = covXX;
+            stateout[tmp+6] = covXTx;
+            stateout[tmp+7] = covTxTx;
+            stateout[tmp+8] = covYY;
+            stateout[tmp+9] = covYTy;
+            stateout[tmp+10]= covTyTy;            
             }
+        }
+    };
 #endif
-
-
