@@ -25,6 +25,7 @@ int main(int argc, char **argv){
     printf("Filtering with OpenCL\n");
     size.Filter_OpenCL();
     #endif
+    size.save_results();
     
 #elif defined(BAD)
     Run run(argv[1]);

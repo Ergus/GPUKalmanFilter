@@ -7,13 +7,18 @@
 
 #ifdef UOCL
 #include "Filter_OpenCL.h"
-#endif 
+#define output "Opencl_states.txt"
+#else
+#define output "Good_states.txt"
+#endif
 
 class sizes{
     public:
         sizes(const char fn[]);
         ~sizes();
         void print();
+        void save_results();
+        
         #ifdef UOCL
         float Filter_OpenCL();
         #endif
@@ -23,7 +28,7 @@ class sizes{
         
         //This is only 1 vale per track
         float *sum2;  
-        bool *backward;
+        int *backward;
         
 
         //This will contain the indices
@@ -41,8 +46,6 @@ class sizes{
         // 1/hit
         float *full;
 
-        //The state for output 1/track
-        float *fullstate;
     };
 
 #endif

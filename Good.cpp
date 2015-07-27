@@ -45,7 +45,7 @@ sizes::sizes(const char fn[]):
     // This values belong to every track;
     // They are allways 0 here, but for a better realistic benchmark
     // considering memory access were included;
-    statein = (float*) calloc(4*nbtracks,sizeof(float));
+    statein = (float*) calloc(2*nbtracks,sizeof(float));
 
     // This is the output array, have different shape for to be used
     // with structs [xyzxyzxyz]
@@ -54,10 +54,10 @@ sizes::sizes(const char fn[]):
     // This are external values to be passed from outside to the filter
     // in real function this is calculated in MakeLHCB.
     sum2     =(float*) malloc(nbtracks*sizeof(float));
-    backward =(bool*) malloc(nbtracks*sizeof(bool));
+    backward =(int*) malloc(nbtracks*sizeof(int));
     
     
-    int ih=0, it=0, ie=0, hpt, tmp;
+    int ih=0, it=0, ie=0, hpt;
     while(getline(&line,&len,fp) != -1){
         const char val=line[0];
         // This next IF is not really needed,
@@ -65,14 +65,12 @@ sizes::sizes(const char fn[]):
         if (isalpha(val)){ 
             if(val=='T'){
                 tracks_start[it]=ih;
-                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",
-                       &sum2[it],&tmp,&hpt);
-                backward[it]=(bool)tmp;
+                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",&sum2[it],&backward[it],&hpt);
                 for(int i=0;i<hpt;i++,ih++){
                     fscanf(fp,
-                           "%f %f %f %*f %*f %f %f %*d %*d",
-                           &x[ih],&y[ih],&z[ih],
-                           &wxerr[ih],&wyerr[ih]);
+                          "%f %f %f %*f %*f %f %f %*d %*d",
+                          &x[ih],&y[ih],&z[ih],
+                          &wxerr[ih],&wyerr[ih]);
                     }
                 it++;
                 }
@@ -94,6 +92,7 @@ sizes::~sizes(){
     free(sum2);
     free(backward);
     free(stateout);
+    free(statein);
     }
 
 void sizes::print(){
@@ -117,11 +116,26 @@ void sizes::print(){
         }
     }
 
+void sizes::save_results(){
+    FILE* fp=fopen(output,"w");
+    for(int i=0;i<nbevts;i++){
+        fprintf(fp,"Event: %d\n",i);
+        int evstart=event_start[i],
+            evtend =event_start[i+1];
+        for(int j=evstart,cont=0;j<evtend;j++,cont++){
+            int jt=11*j;
+            fprintf(fp,"Track: %d\n", cont);
+            fprintf(fp,"\t     %g %g %g %g %g\n\tCov: %g %g %g %g %g %g\n",stateout[jt],stateout[jt+1],stateout[jt+2],stateout[jt+3],stateout[jt+4],stateout[jt+5],stateout[jt+6],stateout[jt+7],stateout[jt+8],stateout[jt+9],stateout[jt+10]);
+            }
+        }
+    fclose(fp);
+    }
+
 #ifdef UOCL
 float sizes::Filter_OpenCL(){
             return clFilter(event_start,
                             tracks_start,
-                            fullstate,
+                            statein,
                             full,
                             backward,
                             sum2,
@@ -130,5 +144,9 @@ float sizes::Filter_OpenCL(){
                             nbtracks,
                             nbhits
                             );
+
+
             }
 #endif
+
+

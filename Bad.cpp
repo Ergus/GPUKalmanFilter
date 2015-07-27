@@ -40,14 +40,16 @@ inline float filter(const float z, float &x, float &tx,
     }
     }
 
+int tmp;
+
 float PrPixelTrack::fitKalman(State &state, const int direct,
                               const float noise2PerLayer)const {
-
     // assume the hits are sorted, but don't assume anything on the direction of
     // sorting
     int firsthit = 0;
     int lasthit = m_hits.size() - 1;
     int dhit = +1;
+    
     if ((m_hits[lasthit].z()-m_hits[firsthit].z())*direct<0){
         std::swap(firsthit, lasthit);
         dhit = -1;
@@ -105,6 +107,9 @@ float PrPixelTrack::fitKalman(State &state, const int direct,
     state.covariance()(1, 1) = covYY;
     state.covariance()(1, 3) = covYTy;
     state.covariance()(3, 3) = covTyTy;
+
+    tmp++;
+    
     return chi2;
     }
 
