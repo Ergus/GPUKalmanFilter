@@ -76,8 +76,7 @@ test: $(file)
 .PHONY: check
 check: $(file)
 	rm -rf *.txt
-	./opencl.x test.dat
-	./bad.x test.dat
-	./good.x test.dat
+	for a in $(file); do ./$$a test.dat; done
+	diff Opencl_states2.txt Bad_states.txt
 	diff Opencl_states.txt Bad_states.txt
 	diff Good_states.txt Bad_states.txt
