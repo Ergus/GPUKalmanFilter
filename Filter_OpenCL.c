@@ -188,6 +188,8 @@ float clFilter(int *evstart,
         exit(1);
         }
 
+    clFinish(queue);    
+    
     cl_event kernelEvent;
     // Enqueue kernel
     err = clEnqueueNDRangeKernel(queue,
@@ -200,6 +202,15 @@ float clFilter(int *evstart,
     
     clWaitForEvents(1 , &kernelEvent);
 
+
+    cl_ulong time_start, time_end;
+    double total_time;
+
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+    total_time = (time_end - time_start)/1000000.0;
+
+    printf("\nExecution time in milliseconds = %0.3f ms\n", total_time );
 
     // Read the kernel's output
     err = clEnqueueReadBuffer(queue,
