@@ -6,9 +6,14 @@
 #include <ctype.h>
 #include "Filter.h"
 
-#ifdef UOCL
+#if (defined UOCL || defined UOCL2)
 #include "Filter_OpenCL.h"
+#endif
+
+#ifdef UOCL
 #define output "Opencl_states.txt"
+#elif defined UOCL2
+#define output "Opencl_states2.txt"
 #else
 #define output "Good_states.txt"
 #endif

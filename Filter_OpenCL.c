@@ -1,5 +1,4 @@
 
-
 #include <Filter_OpenCL.h>
 
 void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
@@ -122,7 +121,6 @@ float clFilter(int *evstart,
     
     // OpenCL structures
     cl_int err;
-    cl_uint work_dim = 1;
 
     cl_device_id* devices;
     cl_platform_id platform = NULL;
@@ -141,8 +139,9 @@ float clFilter(int *evstart,
         exit(1);   
         };
     
-    size_t local_size[2] = {LOCALSIZE, 1},
-          global_size[2] = {tracks, 1};
+    size_t local_size[2] = {LOCALSIZE, 2},
+        blocks=(tracks+LOCALSIZE-1)/LOCALSIZE,
+        global_size[2] = {blocks*LOCALSIZE, 2};
 
     // Build program
     cl_program program = build_program(context, devices[DEVICE_NUMBER], PROGRAM_FILE);
@@ -193,7 +192,7 @@ float clFilter(int *evstart,
     // Enqueue kernel
     err = clEnqueueNDRangeKernel(queue,
                                  kernel,
-                                 work_dim, NULL,
+                                 dimension, NULL,
                                  global_size, 
                                  local_size,
                                  0, NULL,

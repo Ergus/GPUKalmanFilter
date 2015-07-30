@@ -40,11 +40,11 @@ __kernel void Kalman_Filter(__constant float* ttrack,
 
     //Declared before because it is the most important var
     const int idx = get_global_id(0);
-
-    if(idx==0)
-        printf("OpenCL dim 1 from idx= %d\n", idx);
-    
     if(idx>=tracks) return;
+    
+    const int idy = get_global_id(1);
+    if(idx==0 && idy==0)
+        printf("OpenCL dim 2 from idx= %d, idy= %d\n", idx, idy);  
     
     int first = trstart[idx],
         last = trstart[idx+1],
@@ -52,15 +52,12 @@ __kernel void Kalman_Filter(__constant float* ttrack,
         dhit, size=last-first-1;
     const float noise2PerLayer=sum2[idx];
     
-    float ax[24],ay[24],
-        az[24],aerrx[24],aerry[24];
+    float ax[24],az[24],aerrx[24];
 
     for(int i=first, j=0;i<last;i++, j++){
-        ax[j]   = fullin[i];
-        ay[j]   = fullin[i+hits];
+        ax[j]   = fullin[i+idy*hits];
         az[j]   = fullin[i+2*hits];
-        aerrx[j]= fullin[i+3*hits];
-        aerry[j]= fullin[i+4*hits];        
+        aerrx[j]= fullin[i+(idy+3)*hits];
         }
 
     if((az[size]-az[0])*direction<0){
@@ -76,52 +73,36 @@ __kernel void Kalman_Filter(__constant float* ttrack,
     
     float x = ax[first],
         tx = ttrack[idx],
-         y = ay[first],
-        ty = ttrack[idx+tracks],
          z = az[first],
-        wx = aerrx[first],
-        wy = aerry[first];
+        wx = aerrx[first];
     
     // initialize the covariance matrix
     float covXTx  = 0.0f;  // no initial correlation
-    float covYTy  = 0.0f;
     float covTxTx = 1.0f;  // randomly large error
-    float covTyTy = 1.0f;
     float covXX = 1.0f /(wx*wx);
-    float covYY = 1.0f /(wy*wy);
     float chi2=0.0f;
     
     for (int i=first+dhit; i!=last; i+=dhit) {    
         wx=aerrx[i];
-        wy=aerry[i];
         covTxTx+=noise2PerLayer;
-        covTyTy+=noise2PerLayer;
 
         // filter X
         chi2 += filter(z, &x, &tx, &covXX, &covXTx, &covTxTx,az[i], ax[i], wx*wx);
         // filter Y
-        chi2 += filter(z, &y, &ty, &covYY, &covYTy, &covTyTy,az[i], ay[i], wy*wy);
         z=az[i];
         }
 
     // add the noise at the last hit
     covTxTx += noise2PerLayer;
-    covTyTy += noise2PerLayer;
 
     // finally, fill the state
     int tmp=11*idx;
-    fullout[tmp+0]=x;
-    fullout[tmp+1]=y;
-    fullout[tmp+2]=z;
-    fullout[tmp+3]=tx;
-    fullout[tmp+4]=ty;
+    fullout[tmp+idy]=x;
+    if(idy==0) fullout[tmp+2]=z;
+    fullout[tmp+3+idy]=tx;
 
-    fullout[tmp+5] = covXX;
-    fullout[tmp+6] = covXTx;
-    fullout[tmp+7] = covTxTx;
-    fullout[tmp+8] = covYY;
-    fullout[tmp+9] = covYTy;
-    fullout[tmp+10]= covTyTy;
+    fullout[tmp+5+3*idy] = covXX;
+    fullout[tmp+6+3*idy] = covXTx;
+    fullout[tmp+7+3*idy] = covTxTx;
     
     }
-

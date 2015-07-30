@@ -6,7 +6,7 @@
     #include "Bad.h"
 #endif
 
-#ifdef UOCL
+#if (defined UOCL || defined UOCL2)
 #include "Filter_OpenCL.h"
 #endif
 

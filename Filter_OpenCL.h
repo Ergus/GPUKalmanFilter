@@ -1,7 +1,14 @@
 #ifndef FILTER_CL_H_
 #define FILTER_CL_H_ 1
 
+#ifdef UOCL
 #define PROGRAM_FILE "Filter_OpenCL.cl"
+#define dimension 1
+#elif defined UOCL2
+#define PROGRAM_FILE "Filter_OpenCL2.cl"
+#define dimension 2
+#endif
+
 #define KERNEL_FUNC "Kalman_Filter"
 #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 

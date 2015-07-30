@@ -6,7 +6,7 @@ CXXFLAGS = -O3 -std=c++11
 CC=gcc
 CFLAGS=-std=c99 -Wall -DUNIX
 
-file = good.x bad.x opencl.x
+file = good.x bad.x opencl.x opencl2.x
 libs = Good.o Bad.o
 
 all: $(file)
@@ -45,6 +45,9 @@ endif
 Filter_OpenCL.o: Filter_OpenCL.c
 	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL
 
+Filter_OpenCL2.o: Filter_OpenCL.c
+	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL2
+
 #------END OpenCL------------------
 
 good.x: main.cc $(libs)
@@ -55,6 +58,9 @@ bad.x: main.cc $(libs)
 
 opencl.x: main.cc Good.cpp Filter_OpenCL.o
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
+
+opencl2.x: main.cc Good.cpp Filter_OpenCL2.o
+	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL2 $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
 
 %.o: %.cpp Filter.o
 	$(CXX) $(CXXFLAGS) -c $^ -o $@
