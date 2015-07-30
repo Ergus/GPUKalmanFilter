@@ -22,7 +22,7 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
     clGetDeviceIDs(*platform, CL_DEVICE_TYPE_ACCELERATOR, 0, NULL, &numAccelerators);
     *devices = (cl_device_id*) malloc(numAccelerators * sizeof(cl_device_id));
 
-    fprintf(stderr,"\nDevices available: \n");
+    fprintf(stderr,"Devices available: \n");
     fprintf(stderr,"CPU: %u\nGPU: %u\nAccelerators: %u\n",numCpus,numGpus,numAccelerators);
 
     if (DEVICE_PREFERENCE == DEVICE_CPU && numCpus > 0) {
@@ -206,11 +206,11 @@ float clFilter(int *evstart,
     cl_ulong time_start, time_end;
     double total_time;
 
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
-    total_time = (time_end - time_start)/1000000.0;
+    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+    total_time = (time_end - time_start)/1000.0;
 
-    printf("\nExecution time in milliseconds = %0.3f ms\n", total_time );
+    printf("Execution time in milliseconds = %0.3f ns\n\n", total_time );
 
     // Read the kernel's output
     err = clEnqueueReadBuffer(queue,

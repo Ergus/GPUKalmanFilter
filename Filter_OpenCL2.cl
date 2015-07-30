@@ -43,8 +43,6 @@ __kernel void Kalman_Filter(__constant float* ttrack,
     if(idx>=tracks) return;
     
     const int idy = get_global_id(1);
-    if(idx==0 && idy==0)
-        printf("OpenCL dim 2 from idx= %d, idy= %d\n", idx, idy);  
     
     int first = trstart[idx],
         last = trstart[idx+1],

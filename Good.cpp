@@ -133,7 +133,7 @@ void sizes::save_results(){
 
 #if (defined UOCL || defined UOCL2)
 float sizes::fitKalman(){
-    printf("Filter with OpenCL\n");
+    printf("Filter with OpenCL %d\n", dimension);
     return clFilter(event_start,
                     tracks_start,
                     statein,

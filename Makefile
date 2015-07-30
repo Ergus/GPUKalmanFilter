@@ -80,3 +80,11 @@ check: $(file)
 	diff Opencl_states2.txt Bad_states.txt
 	diff Opencl_states.txt Bad_states.txt
 	diff Good_states.txt Bad_states.txt
+
+.PHONY: check
+hard_check: $(file)
+	rm -rf *.txt
+	for a in $(file); do ./$$a in.dat; done
+	diff Opencl_states2.txt Bad_states.txt
+	diff Opencl_states.txt Bad_states.txt
+	diff Good_states.txt Bad_states.txt

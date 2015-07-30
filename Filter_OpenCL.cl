@@ -41,9 +41,6 @@ __kernel void Kalman_Filter(__constant float* ttrack,
     //Declared before because it is the most important var
     const int idx = get_global_id(0);
 
-    if(idx==0)
-        printf("OpenCL dim 1 from idx= %d\n", idx);
-    
     if(idx>=tracks) return;
     
     int first = trstart[idx],
@@ -110,6 +107,8 @@ __kernel void Kalman_Filter(__constant float* ttrack,
 
     // finally, fill the state
     int tmp=11*idx;
+    if(idx<10)
+        printf("%d %g %g\n", idx, x, covXX);
     fullout[tmp+0]=x;
     fullout[tmp+1]=y;
     fullout[tmp+2]=z;
