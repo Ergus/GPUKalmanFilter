@@ -15,6 +15,7 @@
 #elif defined UOCL2
 #define output "Opencl_states2.txt"
 #else
+#include <time.h>
 #define output "Good_states.txt"
 #endif
 

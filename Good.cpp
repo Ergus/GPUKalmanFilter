@@ -134,6 +134,10 @@ void sizes::save_results(){
 #if (defined UOCL || defined UOCL2)
 float sizes::fitKalman(){
     printf("Filter with OpenCL %d\n", dimension);
+    clock_t begin, end;
+    double time_spent;
+
+    begin = clock();
     return clFilter(event_start,
                     tracks_start,
                     statein,
@@ -145,10 +149,17 @@ float sizes::fitKalman(){
                     nbtracks,
                     nbhits
                     );
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Total time Filtering: %lf\n",time_spent);
     }
 #else
 float sizes::fitKalman(){
-    printf("Filter with Good method\n");    
+    printf("Filter with Good method\n");
+    clock_t begin, end;
+    double time_spent;
+
+    begin = clock();
     for(int i=0;i<nbevts;i++){
         int evstart=event_start[i],
             evtend =event_start[i+1];
@@ -213,5 +224,8 @@ float sizes::fitKalman(){
             stateout[tmp+10]= covTyTy;            
             }
         }
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Total time Filtering: %lf\n",time_spent);
     };
 #endif
