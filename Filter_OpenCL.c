@@ -1,5 +1,5 @@
 
-#include <Filter_OpenCL.h>
+#include "Filter_OpenCL.h"
 
 void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
     // Choose the first available platform
@@ -146,22 +146,31 @@ float clFilter(int *evstart,
     // Build program
     cl_program program = build_program(context, devices[DEVICE_NUMBER], PROGRAM_FILE);
 
-    // Allocate arrays to the host
+    // Allocate arrays to the device
     //Array int start events [nbevents+1]
-    cl_mem dev_evstart = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (events+1)*sizeof(int), evstart, &err);
+    cl_mem dev_evstart = clCreateBuffer(context, CL_MEM_READ_ONLY, (events+1)*sizeof(int), NULL, &err);
     //Array int start tracks [nbtracks+1]
-    cl_mem dev_trstart = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (tracks+1)*sizeof(int), trstart, &err);
+    cl_mem dev_trstart = clCreateBuffer(context, CL_MEM_READ_ONLY, (tracks+1)*sizeof(int), NULL, &err);
     //Array for tx,ty/track  [2*tracks]
-    cl_mem dev_ttrack = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 2*tracks*sizeof(float), ttrack, &err);
+    cl_mem dev_ttrack = clCreateBuffer(context, CL_MEM_READ_ONLY, 2*tracks*sizeof(float), NULL, &err);
     //Array float data hits  [5*nbhits]
-    cl_mem dev_fullin = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 5*hits*sizeof(float), fullin, &err);
+    cl_mem dev_fullin = clCreateBuffer(context, CL_MEM_READ_WRITE, 5*hits*sizeof(float), NULL, &err);
     //Array bool backward    [nbtracks]
-    cl_mem dev_backward = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, tracks*sizeof(int), backward, &err);
+    cl_mem dev_backward = clCreateBuffer(context, CL_MEM_READ_ONLY, tracks*sizeof(int), NULL, &err);
     //array float parameter  [nbtracks]
-    cl_mem dev_sum2 = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, tracks*sizeof(float), sum2, &err);
+    cl_mem dev_sum2 = clCreateBuffer(context, CL_MEM_READ_ONLY, tracks*sizeof(float), NULL, &err);
     //Array float results.   [11*nbtracks]
     cl_mem dev_fullout = clCreateBuffer(context, CL_MEM_READ_WRITE, 11*tracks*sizeof(float), NULL, &err);
-
+    //---------------------------
+        // Allocate arrays to the device
+    clEnqueueWriteBuffer(queue, dev_evstart, CL_TRUE, 0, (events+1)*sizeof(int), evstart, 0, NULL, NULL);
+    clEnqueueWriteBuffer(queue, dev_trstart, CL_TRUE, 0, (tracks+1)*sizeof(int), trstart, 0, NULL, NULL);
+    clEnqueueWriteBuffer(queue, dev_ttrack,  CL_TRUE, 0, 2*tracks*sizeof(float), ttrack,  0, NULL, NULL);
+    clEnqueueWriteBuffer(queue, dev_fullin, CL_TRUE, 0, 5*hits*sizeof(float), fullin, 0, NULL, NULL);
+    clEnqueueWriteBuffer(queue, dev_backward, CL_TRUE, 0, tracks*sizeof(int), backward, 0, NULL, NULL);
+    clEnqueueWriteBuffer(queue, dev_sum2, CL_TRUE, 0, tracks*sizeof(float), sum2, 0, NULL, NULL);
+    
+    //----------------------------
     if(err < 0) {
         perror("Couldn't create a buffer");
         exit(1);   
