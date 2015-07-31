@@ -13,7 +13,7 @@
 #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 
 #ifndef LOCALSIZE
-    #define LOCALSIZE 64
+#define LOCALSIZE 64
 #endif
 
 #define DEVICE_NUMBER 0
@@ -37,19 +37,33 @@
 extern "C" {
 #endif
     
-cl_device_id create_device();
-cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename);
+    //Debuging Functions, Defensive programming
+#define clCheck(stmt) {                                                 \
+        cl_int status = stmt;                                           \
+        if (status != CL_SUCCESS) {                                     \
+            fprintf(stderr,"Error in function %s\n",#stmt);             \
+            fprintf(stderr,"Error string: %s\n", getErrorString(status)); \
+            exit(-1);                                                    \
+            }                                                           \
+        }
 
-float clFilter(int *evstart,
-               int *trstart,
-               float *ttrack,
-               float *fullin,
-               int *backward,
-               float *sum2,
-               float *fullout,
-               size_t events,
-               size_t tracks,
-               size_t hits);
+    const char *getErrorString(cl_int error);
+    
+    void checkClError(const cl_int errcode);
+    
+    cl_device_id create_device();
+    cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename);
+
+    float clFilter(int *evstart,
+                   int *trstart,
+                   float *ttrack,
+                   float *fullin,
+                   int *backward,
+                   float *sum2,
+                   float *fullout,
+                   size_t events,
+                   size_t tracks,
+                   size_t hits);
 
 #ifdef __cplusplus
 }

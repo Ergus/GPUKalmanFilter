@@ -6,9 +6,9 @@
     #include "Bad.h"
 #endif
 
-#if (defined UOCL || defined UOCL2)
-#include "Filter_OpenCL.h"
-#endif
+//#if (defined UOCL || defined UOCL2)
+//#include "Filter_OpenCL.h"
+//#endif
 
 int main(int argc, char **argv){
     if(argc<2){
