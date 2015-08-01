@@ -1,14 +1,17 @@
 
 #include "Serializer.h"
 #ifdef GOOD
+    #define thistest "Good"
     #include "Good.h"
 #elif defined(BAD)
+    #define thistest "Bad"
     #include "Bad.h"
 #endif
 
-//#if (defined UOCL || defined UOCL2)
-//#include "Filter_OpenCL.h"
-//#endif
+#if (defined UOCL || defined UOCL2)
+    #undef thistest
+    #define thistest "OpenCL"
+#endif
 
 int main(int argc, char **argv){
     if(argc<2){
@@ -16,19 +19,18 @@ int main(int argc, char **argv){
         exit(EXIT_FAILURE);
         }
 
-    Serializer ser("Bad_states.txt");
-    
+    printf("Test for %s\n",thistest);
 #ifdef GOOD
     sizes size(argv[1]);
-    printf("Good memory test\n");
     size.fitKalman();
     size.save_results();
     
 #elif defined(BAD)
     Run run(argv[1]);
+    Serializer ser("Bad_states.txt");
     run.filterall();
     ser(run);
-    printf("Bad memory test\n");
+
 #endif
     return 0;
     }

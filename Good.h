@@ -25,7 +25,7 @@ class sizes{
         ~sizes();
         void print();
         void save_results();
-        float fitKalman();        
+        void fitKalman();        
         
         //Hits information, only the pointers
         float *x,*y,*z,*wxerr,*wyerr;

@@ -4,14 +4,15 @@ CXX = g++
 CXXFLAGS = -O3 -std=c++11
 
 CC=gcc
-CFLAGS=-std=c99 -Wall -DUNIX
+CFLAGS=-O3 -std=c99
 
 file = good.x bad.x opencl.x opencl2.x
 libs = Good.o Bad.o
 
 all: $(file)
 
-debug: CXXFLAGS = -O0 -DDEBUG -g -std=c++11
+debug: CXXFLAGS = -O0 -DDEBUG -g -std=c++11 -Wall -DUNIX
+debug: CFLAGS = -O0 -DDEBUG -g -std=c99 -Wall -DUNIX
 debug: $(file)
 
 #---OpenCL, this will go inside an if
@@ -81,7 +82,7 @@ check: $(file)
 	diff Opencl_states.txt Bad_states.txt
 	diff Good_states.txt Bad_states.txt
 
-.PHONY: check
+.PHONY: hard_check
 hard_check: $(file)
 	rm -rf *.txt
 	for a in $(file); do ./$$a in.dat; done

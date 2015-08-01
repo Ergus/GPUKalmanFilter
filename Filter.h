@@ -1,6 +1,18 @@
 #ifndef FILTER_H_
 #define FILTER_H_ 1
 
+#include <time.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/time.h>
+
+inline double mtimes(){
+    struct timeval tmp;
+    double sec;
+    gettimeofday( &tmp, (struct timezone *)0 );
+    sec = tmp.tv_sec + ((double)tmp.tv_usec)/1000000.0;
+    return sec;
+    }
 
 /// Helper function to filter one hits
 inline float filter(const float z, float &x, float &tx,

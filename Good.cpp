@@ -79,9 +79,6 @@ sizes::sizes(const char fn[]):
         }
     event_start[ie]=it;
     tracks_start[it]=ih;
-    #ifdef DEBUG
-        print();
-    #endif
     }
 
 sizes::~sizes(){
@@ -132,13 +129,11 @@ void sizes::save_results(){
     }
 
 #if (defined UOCL || defined UOCL2)
-float sizes::fitKalman(){
+void sizes::fitKalman(){
     printf("Filter with OpenCL %d\n", dimension);
-    clock_t begin, end;
-    double time_spent;
 
-    begin = clock();
-    return clFilter(event_start,
+    const double begin = mtimes();
+    clFilter(event_start,
                     tracks_start,
                     statein,
                     full,
@@ -149,17 +144,14 @@ float sizes::fitKalman(){
                     nbtracks,
                     nbhits
                     );
-    end = clock();
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Total time Filtering: %lf\n",time_spent);
+    const double end = mtimes();
+    printf("Total time Filtering: %lg s\n\n",end-begin);
     }
-#else
-float sizes::fitKalman(){
-    printf("Filter with Good method\n");
-    clock_t begin, end;
-    double time_spent;
 
-    begin = clock();
+#else
+void sizes::fitKalman(){
+    printf("Filter with Good method\n");
+    const double begin = mtimes();
     for(int i=0;i<nbevts;i++){
         int evstart=event_start[i],
             evtend =event_start[i+1];
@@ -167,7 +159,6 @@ float sizes::fitKalman(){
             int trstart=tracks_start[j],
                 trend=tracks_start[j+1]-1,
                 direction=(backward[j]?1:-1),
-                size=trend-trstart,
                 dhit=1;
             const float noise2PerLayer=sum2[j];
             
@@ -198,10 +189,7 @@ float sizes::fitKalman(){
                 lwy=wyerr[k];
                 covTxTx+=noise2PerLayer;
                 covTyTy+=noise2PerLayer;
-
-                // filter X
                 chi2 += filter(lz,lx,ltx,covXX,covXTx,covTxTx,z[k], x[k], lwx*lwx);
-                // filter Y
                 chi2 += filter(lz,ly,lty,covYY,covYTy,covTyTy,z[k], y[k], lwy*lwy);
                 lz=z[k];
                 }
@@ -224,8 +212,7 @@ float sizes::fitKalman(){
             stateout[tmp+10]= covTyTy;            
             }
         }
-    end = clock();
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Total time Filtering: %lf\n",time_spent);
+    const double end = mtimes();
+    printf("Total time Filtering: %lg s\n\n",end - begin);
     };
 #endif

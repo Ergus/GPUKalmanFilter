@@ -22,7 +22,7 @@ class Serializer{
                     );
             }
         void operator()(Run &run){
-            int evt=0, tracks, evts=run.size();
+            int tracks, evts=run.size();
             for(int i=0;i<evts;i++){
                 fprintf(fp,"Event: %d\n",i);
                 tracks=run.m_allstates[i].size();

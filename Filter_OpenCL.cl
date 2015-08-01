@@ -107,8 +107,6 @@ __kernel void Kalman_Filter(__constant float* ttrack,
 
     // finally, fill the state
     int tmp=11*idx;
-    if(idx<10)
-        printf("%d %g %g\n", idx, x, covXX);
     fullout[tmp+0]=x;
     fullout[tmp+1]=y;
     fullout[tmp+2]=z;

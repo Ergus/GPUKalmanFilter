@@ -110,7 +110,7 @@ Run::Run(const char fn[])
     sum2.reserve(nbevts);
     backward.reserve(nbevts);
     
-    int hpt, ign1, read_backward;
+    int hpt, read_backward;
     float x,y,z,wxerr,wyerr,read_sum2;
 
     while(getline(&line,&len,fp) != -1){
@@ -144,9 +144,7 @@ Run::Run(const char fn[])
                 }
             }
         }
-    #ifdef DEBUG
-        print();
-    #endif
+
     }
 
 void Run::print(){
@@ -167,6 +165,7 @@ void Run::print(){
     }
 
 void Run::filterall(){
+    const double begin = mtimes();
     int nbev=m_events.size(), nbtr;
     for(int i=0;i<nbev;i++){
         nbtr=m_events[i].size();
@@ -177,5 +176,7 @@ void Run::filterall(){
       
             }
         }
+    const double end = mtimes();
+    printf("Total time Filtering: %lg s\n\n",end - begin);
     }
 

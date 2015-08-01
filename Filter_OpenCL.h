@@ -38,19 +38,23 @@ extern "C" {
 #endif
     
     //Debuging Functions, Defensive programming
-#define clCheck(stmt) {                                                 \
-        cl_int status = stmt;                                           \
-        if (status != CL_SUCCESS) {                                     \
-            fprintf(stderr,"Error in function %s\n",#stmt);             \
+    #define clCheck(stmt) {                                               \
+        cl_int status = stmt;                                             \
+        if (status != CL_SUCCESS) {                                       \
+            fprintf(stderr,"Error in function %s\n",#stmt);               \
             fprintf(stderr,"Error string: %s\n", getErrorString(status)); \
-            exit(-1);                                                    \
-            }                                                           \
+            exit(-1);                                                     \
+            }                                                             \
+        }
+       
+    #define checkClError(errcode) {                   \
+        if (errcode != CL_SUCCESS) {                  \
+            fprintf(stderr,"Error %d\n", errcode);    \
+            exit(-1);                                 \
+            }                                         \
         }
 
     const char *getErrorString(cl_int error);
-    
-    void checkClError(const cl_int errcode);
-    
     cl_device_id create_device();
     cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename);
 

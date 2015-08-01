@@ -14,28 +14,32 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
         }
 
     // Choose a device from the platform according to DEVICE_PREFERENCE
-    cl_uint numCpus = 0;
-    cl_uint numGpus = 0;
-    cl_uint numAccelerators = 0;
-    clGetDeviceIDs(*platform, CL_DEVICE_TYPE_CPU, 0, NULL, &numCpus);
-    clGetDeviceIDs(*platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numGpus);
-    clGetDeviceIDs(*platform, CL_DEVICE_TYPE_ACCELERATOR, 0, NULL, &numAccelerators);
-    *devices = (cl_device_id*) malloc(numAccelerators * sizeof(cl_device_id));
-
+    cl_uint nbdevices[3] = {};
+    #ifdef DEBUG    
+    const char devnames[3][10]={"CPU","GPU","Acelerator"};
     fprintf(stderr,"Devices available: \n");
-    fprintf(stderr,"CPU: %u\nGPU: %u\nAccelerators: %u\n",numCpus,numGpus,numAccelerators);
+    #endif
+    int types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
 
-    if (DEVICE_PREFERENCE == DEVICE_CPU && numCpus > 0) {
-        fprintf(stderr,"Choosing CPU\n");
-        clGetDeviceIDs(*platform, CL_DEVICE_TYPE_CPU, numCpus, *devices, NULL);
+    
+    for(int i=0;i<3;i++){
+        clGetDeviceIDs(*platform, types[i], 0, NULL, &nbdevices[i]);
+        #ifdef DEBUG
+        fprintf(stderr,"%s: %u\n",devnames[i],nbdevices[i]);
+        #endif        
         }
-    else if (DEVICE_PREFERENCE == DEVICE_GPU && numGpus > 0) {
-        fprintf(stderr,"Choosing GPU\n");
-        clGetDeviceIDs(*platform, CL_DEVICE_TYPE_GPU, numGpus, *devices, NULL);
-        }
-    else if (DEVICE_PREFERENCE == DEVICE_ACCELERATOR && numAccelerators > 0) {
-        fprintf(stderr,"Choosing accelerator\n");
-        clGetDeviceIDs(*platform, CL_DEVICE_TYPE_ACCELERATOR, numAccelerators, *devices, NULL);
+
+    if (nbdevices[DEVICE_PREFERENCE]>0){
+        *devices = (cl_device_id*) malloc(nbdevices[DEVICE_PREFERENCE] * sizeof(cl_device_id));        
+        clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL);
+        #ifdef DEBUG
+        fprintf(stderr,"Choosing %s\n",devnames[DEVICE_PREFERENCE]);
+        for(int i=0;i<nbdevices[DEVICE_PREFERENCE];i++){
+            char buffer[10240];
+            clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
+            printf("  Device Name = %s\n", buffer);
+            }        
+        #endif
         }
     else {
         // We couldn't match the preference.
@@ -59,14 +63,12 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
 cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename) {
 
     cl_program program;
-    FILE *program_handle;
     char *program_buffer, *program_log;
     size_t program_size, log_size;
-    int err;
-
+    cl_int err;
 
     // Read program file and place content into buffer
-    program_handle = fopen(filename, "r");
+    FILE *program_handle = fopen(filename, "r");
     if(program_handle == NULL) {
         perror("Couldn't find the program file");
         exit(1);
@@ -90,7 +92,9 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
     free(program_buffer);
 
     // Build program
-    err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+    //err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+    const char* buildOptions = "";
+    err = clBuildProgram(program, 1, &dev, buildOptions, NULL, NULL);
     if(err < 0) {
 
         // Find size of log and print to std output
@@ -161,6 +165,10 @@ float clFilter(int *evstart,
     cl_mem dev_sum2 = clCreateBuffer(context, CL_MEM_READ_ONLY, tracks*sizeof(float), NULL, &err); checkClError(err);
     //Array float results.   [11*nbtracks]
     cl_mem dev_fullout = clCreateBuffer(context, CL_MEM_READ_WRITE, 11*tracks*sizeof(float), NULL, &err); checkClError(err);
+    if(err < 0) {
+        perror("Couldn't create a buffer");
+        exit(1);   
+        };
     //---------------------------
         // Allocate arrays to the device
     clCheck(clEnqueueWriteBuffer(queue, dev_evstart, CL_TRUE, 0, (events+1)*sizeof(int), evstart, 0, NULL, NULL));
@@ -171,10 +179,6 @@ float clFilter(int *evstart,
     clCheck(clEnqueueWriteBuffer(queue, dev_sum2, CL_TRUE, 0, tracks*sizeof(float), sum2, 0, NULL, NULL));
     
     //----------------------------
-    if(err < 0) {
-        perror("Couldn't create a buffer");
-        exit(1);   
-        };
     
     // Create a kernel
     cl_kernel kernel = clCreateKernel(program, KERNEL_FUNC, &err);
@@ -197,19 +201,19 @@ float clFilter(int *evstart,
         exit(1);
         }
 
-    clFinish(queue);    
+    clCheck(clFinish(queue));    
     
     cl_event kernelEvent;
     // Enqueue kernel
-    err = clEnqueueNDRangeKernel(queue,
+    clCheck(clEnqueueNDRangeKernel(queue,
                                  kernel,
                                  dimension, NULL,
                                  global_size, 
                                  local_size,
                                  0, NULL,
-                                 &kernelEvent);
+                                   &kernelEvent));
     
-    clWaitForEvents(1 , &kernelEvent);
+    clCheck(clWaitForEvents(1 , &kernelEvent));
 
 
     cl_ulong time_start, time_end;
@@ -219,22 +223,19 @@ float clFilter(int *evstart,
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
     total_time = (time_end - time_start)/1000.0;
 
-    printf("Execution time in milliseconds = %0.3f ns\n\n", total_time );
+    printf("Execution time in milliseconds = %0.3f ns\n", total_time );
 
     // Read the kernel's output
-    err = clEnqueueReadBuffer(queue,
+    clCheck(clEnqueueReadBuffer(queue,
                               dev_fullout,
                               CL_TRUE,
                               0, 11*tracks*sizeof(float),
                               fullout,
                               0,
                               NULL,
-                              NULL);
-    if(err < 0) {
-        perror("Couldn't read the buffer");
-        exit(1);
-        }
+                              NULL));
 
+    clReleaseEvent(kernelEvent);
     clReleaseKernel(kernel);
 
     clReleaseMemObject(dev_ttrack);
@@ -328,10 +329,3 @@ const char *getErrorString (cl_int error) {
         }
     }
 
-void checkClError(const cl_int errcode) {
-    // CHECK_OPENCL_ERROR(errcode_ret, "Error ");
-    if (errcode != CL_SUCCESS) {
-        fprintf(stderr,"Error %d\n", (int)errcode);
-        exit(-1);
-        }
-    }
