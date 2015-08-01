@@ -5,39 +5,53 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
     // Choose the first available platform
     cl_uint numPlatforms;
     clGetPlatformIDs(0, NULL, &numPlatforms);
-    if(numPlatforms > 0)
-    {
+    if(numPlatforms > 0){
         cl_platform_id* platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
         clGetPlatformIDs(numPlatforms, platforms, NULL);
-        *platform = platforms[0];
+        #ifdef DEBUG
+        char vendor[1024], name[1024];
+        fprintf(stderr,"Number of available platforms %d\n",numPlatforms);
+        for(int i=0;i<numPlatforms;i++){
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, sizeof(name), name, NULL);
+            fprintf(stderr," %c Vendor: %s, Name: %s\n",(PLATFORM_NUMBER==i?'*':' '),vendor,name);
+            }
+        #endif
+        *platform = platforms[PLATFORM_NUMBER];
         free(platforms);
+        }
+    else{
+        fprintf(stderr,"No platforms available error\n");
+        exit(-1);
         }
 
     // Choose a device from the platform according to DEVICE_PREFERENCE
-    cl_uint nbdevices[3] = {};
+    cl_uint nbdevices[3];
+    const int types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
+    
     #ifdef DEBUG    
     const char devnames[3][10]={"CPU","GPU","Acelerator"};
     fprintf(stderr,"Devices available: \n");
     #endif
-    int types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
 
-    
     for(int i=0;i<3;i++){
         clGetDeviceIDs(*platform, types[i], 0, NULL, &nbdevices[i]);
-        #ifdef DEBUG
-        fprintf(stderr,"%s: %u\n",devnames[i],nbdevices[i]);
+        #ifdef DEBUG 
+        fprintf(stderr," %s: %u\n",devnames[i],nbdevices[i]);
         #endif        
         }
 
     if (nbdevices[DEVICE_PREFERENCE]>0){
-        *devices = (cl_device_id*) malloc(nbdevices[DEVICE_PREFERENCE] * sizeof(cl_device_id));        
-        clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL);
+        *devices = (cl_device_id*) malloc(nbdevices[DEVICE_PREFERENCE] * sizeof(cl_device_id));
+        clCheck(clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL));
+        
         #ifdef DEBUG
         fprintf(stderr,"Choosing %s\n",devnames[DEVICE_PREFERENCE]);
         for(int i=0;i<nbdevices[DEVICE_PREFERENCE];i++){
-            char buffer[10240];
-            clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
-            printf("  Device Name = %s\n", buffer);
+            char name[1024],vendor[1024];
+            clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_NAME, sizeof(name), name, NULL));
+            clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL));
+            printf(" %c Device Name = %s, vendor: %s\n", (i==DEVICE_NUMBER?'*':' '),name, vendor);
             }        
         #endif
         }
@@ -49,7 +63,14 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
         if (numDevices > 0) {
             fprintf(stderr,"Preference device couldn't be met\n");
             fprintf(stderr,"Choosing an available OpenCL capable device\n");
+            fprintf(stderr,"There are other %d OpenCL devices available\n",numDevices);
+            *devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
             clGetDeviceIDs(*platform, CL_DEVICE_TYPE_ALL, numDevices, *devices, NULL);
+            for(int i=0;i<numDevices;i++){
+                char buffer[1024];
+                clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
+                printf("  Device Name = %s\n", buffer);
+                }        
             }
         else {
             fprintf(stderr,"No OpenCL capable device detected\n");
@@ -235,6 +256,8 @@ float clFilter(int *evstart,
                               NULL,
                               NULL));
 
+
+    free(devices);
     clReleaseEvent(kernelEvent);
     clReleaseKernel(kernel);
 

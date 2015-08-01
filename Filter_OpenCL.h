@@ -13,9 +13,10 @@
 #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 
 #ifndef LOCALSIZE
-#define LOCALSIZE 64
+#define LOCALSIZE 32
 #endif
 
+#define PLATFORM_NUMBER 0
 #define DEVICE_NUMBER 0
 
 #define DEVICE_CPU 0
