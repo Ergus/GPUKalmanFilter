@@ -44,10 +44,10 @@ endif
 endif
 
 Filter_OpenCL.o: Filter_OpenCL.c
-	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL
+	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=1
 
 Filter_OpenCL2.o: Filter_OpenCL.c
-	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL2
+	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=2
 
 #------END OpenCL------------------
 
@@ -58,10 +58,10 @@ bad.x: main.cc $(libs)
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DBAD
 
 opencl.x: main.cc Good.cpp Filter_OpenCL.o
-	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
+	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL=1 $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
 
 opencl2.x: main.cc Good.cpp Filter_OpenCL2.o
-	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL2 $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
+	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL=2 $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
 
 %.o: %.cpp Filter.o
 	$(CXX) $(CXXFLAGS) -c $^ -o $@

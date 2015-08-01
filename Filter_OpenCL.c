@@ -114,7 +114,11 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 
     // Build program
     //err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-    const char* buildOptions = "";
+    char buildOptions[1024];
+    sprintf(buildOptions,BUILD_OPTIONS,UOCL);
+    #ifdef DEBUG
+    printf("Kernel build options: %s\n",buildOptions);
+    #endif
     err = clBuildProgram(program, 1, &dev, buildOptions, NULL, NULL);
     if(err < 0) {
 

@@ -1,15 +1,10 @@
 #ifndef FILTER_CL_H_
 #define FILTER_CL_H_ 1
 
-#ifdef UOCL
 #define PROGRAM_FILE "Filter_OpenCL.cl"
-#define dimension 1
-#elif defined UOCL2
-#define PROGRAM_FILE "Filter_OpenCL2.cl"
-#define dimension 2
-#endif
-
 #define KERNEL_FUNC "Kalman_Filter"
+#define dimension UOCL
+
 #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 
 #ifndef LOCALSIZE
@@ -22,8 +17,14 @@
 #define DEVICE_CPU 0
 #define DEVICE_GPU 1
 #define DEVICE_ACCELERATOR 2
+
 #define DEVICE_PREFERENCE DEVICE_GPU
 
+#ifdef DEBUG
+#define BUILD_OPTIONS "-DDEBUG -DUOCL=%d"
+#else
+#define BUILD_OPTIONS "-DUOCL=%d"
+#endif
 
 #include <CL/cl.h>
 
@@ -74,5 +75,4 @@ extern "C" {
 }
 #endif
         
-
 #endif
