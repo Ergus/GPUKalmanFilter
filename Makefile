@@ -9,7 +9,7 @@ CXXFLAGS = -O3 -std=c++11
 CC=gcc
 CFLAGS=-O3 -std=c99
 
-file = good.x bad.x
+file = good.x bad.x opencl.x opencl2.x
 libs = Good.o Bad.o
 
 # check of cuda compiler
@@ -58,10 +58,6 @@ else
   endif
 endif
 
-ifdef INC_DIRS
-	file += opencl.x opencl2.x
-endif
-
 Filter_OpenCL.o: Filter_OpenCL.c
 	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=1
 
@@ -106,6 +102,6 @@ check: $(file)
 	for a in *.txt; do \
 		diff $$a Bad_states.txt; \
 		echo "Made diff to: " $$a; \
-		read -p "Press [Enter] key to start backup..."; \
+		read -p "Press [Enter] key to diff next file..."; \
 		done
 
