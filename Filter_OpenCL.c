@@ -26,7 +26,7 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
         }
 
     // Choose a device from the platform according to DEVICE_PREFERENCE
-    cl_uint nbdevices[3];
+    cl_uint nbdevices[3]={};
     const cl_device_type types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
     
     #ifdef DEBUG    

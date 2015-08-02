@@ -6,6 +6,10 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 inline double mtimes(){
     struct timeval tmp;
     double sec;
@@ -14,6 +18,9 @@ inline double mtimes(){
     return sec;
     }
 
+#ifdef __cplusplus
+}
+#endif
 /// Helper function to filter one hits
 #ifndef UOCL
 inline float filter(const float z, float &x, float &tx,

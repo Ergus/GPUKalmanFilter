@@ -39,19 +39,15 @@
 extern "C" {
 #endif
 
-    #define clCheck(stmt) __clCheck( stmt, __FILE__, __LINE__ )
-    
-    inline void __clCheck( cl_int err, const char *file, const int line ){
-        #ifdef DEBUG
-        if ( err != CL_SUCCESS ){
-            fprintf( stderr, "Error at %s:%i : %s\n",
-                     file, line, getErrorString(err) );
-            exit( -1 );
-            }
-        #endif
-        return;
+    #define clCheck(stmt){                                      \
+        cl_int err=stmt;                                        \
+        if ( err != CL_SUCCESS ){                               \
+            fprintf( stderr, "Error at %s:%i : %s calling: %s\n",           \
+                     __FILE__, __LINE__, getErrorString(err), #stmt );        \
+            exit( -1 );                                         \
+            }                                                   \
         }
-    
+
     #define checkClError(errcode) {                   \
         if (errcode != CL_SUCCESS) {                  \
             fprintf(stderr,"Error %d\n", errcode);    \
