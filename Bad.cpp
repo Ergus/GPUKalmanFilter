@@ -165,6 +165,7 @@ void Run::print(){
     }
 
 void Run::filterall(){
+    printf("Filter with Bad method\n");
     const double begin = mtimes();
     int nbev=m_events.size(), nbtr;
     for(int i=0;i<nbev;i++){

@@ -33,20 +33,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Filter.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    #define clCheck(stmt) __clCheck( stmt, __FILE__, __LINE__ )
     
-    //Debuging Functions, Defensive programming
-    #define clCheck(stmt) {                                               \
-        cl_int status = stmt;                                             \
-        if (status != CL_SUCCESS) {                                       \
-            fprintf(stderr,"Error in function %s\n",#stmt);               \
-            fprintf(stderr,"Error string: %s\n", getErrorString(status)); \
-            exit(-1);                                                     \
-            }                                                             \
+    inline void __clCheck( cl_int err, const char *file, const int line ){
+        #ifdef DEBUG
+        if ( err != CL_SUCCESS ){
+            fprintf( stderr, "Error at %s:%i : %s\n",
+                     file, line, getErrorString(err) );
+            exit( -1 );
+            }
+        #endif
+        return;
         }
-       
+    
     #define checkClError(errcode) {                   \
         if (errcode != CL_SUCCESS) {                  \
             fprintf(stderr,"Error %d\n", errcode);    \

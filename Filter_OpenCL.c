@@ -150,6 +150,8 @@ float clFilter(int *evstart,
     
     // OpenCL structures
     cl_int err;
+    cl_ulong gpu_start, gpu_end;
+    double cpu_start, cpu_end;
 
     cl_device_id* devices;
     cl_platform_id platform = NULL;
@@ -230,25 +232,23 @@ float clFilter(int *evstart,
     
     cl_event kernelEvent;
     // Enqueue kernel
+    cpu_start=mtimes();
     clCheck(clEnqueueNDRangeKernel(queue,
                                  kernel,
                                  dimension, NULL,
                                  global_size, 
                                  local_size,
                                  0, NULL,
-                                   &kernelEvent));
+                                 &kernelEvent));
     
     clCheck(clWaitForEvents(1 , &kernelEvent));
+    cpu_end=mtimes();    
 
+    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(gpu_start), &gpu_start, NULL);
+    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(gpu_end), &gpu_end, NULL);
 
-    cl_ulong time_start, time_end;
-    double total_time;
-
-    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
-    clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
-    total_time = (time_end - time_start)/1000.0;
-
-    printf("Kernel execution time = %0.3f ns\n", total_time );
+    printf("Kernel execution time GPU = %0.3lf ns\n", (double)(gpu_end - gpu_start)/1000.0 );
+    printf("Kernel execution time CPU= %0.3lf ns\n", (cpu_end-cpu_start)*1.0E6 );
 
     // Read the kernel's output
     clCheck(clEnqueueReadBuffer(queue,

@@ -9,7 +9,7 @@ CXXFLAGS = -O3 -std=c++11
 CC=gcc
 CFLAGS=-O3 -std=c99
 
-file = good.x bad.x opencl.x opencl2.x
+file = good.x bad.x
 libs = Good.o Bad.o
 
 # check of cuda compiler
@@ -41,26 +41,25 @@ OS = $(shell uname -s 2>/dev/null | tr [:lower:] [:upper:])
 # Linux OS
 LIBS_OCL=-lOpenCL
 ifeq ($(PROC_TYPE),)
-CFLAGS+=-m32
+  CFLAGS+=-m32
 else
-CFLAGS+=-m64
-
-# Check for Linux-AMD
-ifdef AMDAPPSDKROOT
-INC_DIRS=. $(AMDAPPSDKROOT)/include
-ifeq ($(PROC_TYPE),)
-LIB_DIRS=$(AMDAPPSDKROOT)/lib/x86
-else
-LIB_DIRS=$(AMDAPPSDKROOT)/lib/x86_64
-endif
-else
-
-# Check for Linux-Nvidia
-ifdef CUDA
-INC_DIRS=. $(CUDA)/OpenCL/common/inc
+  CFLAGS+=-m64
+  ifdef AMDAPPSDKROOT # Check for Linux-AMD
+    INC_DIRS=. $(AMDAPPSDKROOT)/include
+    ifeq ($(PROC_TYPE),)
+      LIB_DIRS=$(AMDAPPSDKROOT)/lib/x86
+    else
+      LIB_DIRS=$(AMDAPPSDKROOT)/lib/x86_64
+    endif
+  else
+    ifdef CUDA # Check for Linux-Nvidia
+      INC_DIRS=. $(CUDA)/OpenCL/common/inc
+    endif
+  endif
 endif
 
-endif
+ifdef INC_DIRS
+	file += opencl.x opencl2.x
 endif
 
 Filter_OpenCL.o: Filter_OpenCL.c
@@ -104,14 +103,9 @@ test: $(file)
 check: $(file)
 	rm -rf *.txt
 	for a in $(file); do ./$$a test.dat; done
-	diff Opencl_states2.txt Bad_states.txt
-	diff Opencl_states.txt Bad_states.txt
-	diff Good_states.txt Bad_states.txt
+	for a in *.txt; do \
+		diff $$a Bad_states.txt; \
+		echo "Made diff to: " $$a; \
+		read -p "Press [Enter] key to start backup..."; \
+		done
 
-.PHONY: hard_check
-hard_check: $(file)
-	rm -rf *.txt
-	for a in $(file); do ./$$a in.dat; done
-	diff Opencl_states2.txt Bad_states.txt
-	diff Opencl_states.txt Bad_states.txt
-	diff Good_states.txt Bad_states.txt

@@ -15,6 +15,7 @@ inline double mtimes(){
     }
 
 /// Helper function to filter one hits
+#ifndef UOCL
 inline float filter(const float z, float &x, float &tx,
                     float &covXX,float &covXTx,
                     float &covTxTx, const float zhit, 
@@ -44,5 +45,5 @@ inline float filter(const float z, float &x, float &tx,
     // return the chi2
     return r*r*R;
     }
-
+#endif
 #endif

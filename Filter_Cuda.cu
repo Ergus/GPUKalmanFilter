@@ -224,12 +224,14 @@ float cudaFilter(int *evstart,
                size_t hits){
 
 
+    cudaEvent_t gpu_start, gpu_stop;
+    double cpu_start, cpu_stop;
+    float gpu_time;
+    cudaEventCreate(&gpu_start);
+    cudaEventCreate(&gpu_stop);
+    
     dim3 dimBlock(LOCALSIZE,UCUDA),
          dimGrid( (tracks+LOCALSIZE-1)/LOCALSIZE,1);
-
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
 
     int *dev_evstart, *dev_trstart, *dev_backward;
     float *dev_ttrack, *dev_fullin, *dev_sum2, *dev_fullout;
@@ -254,7 +256,8 @@ float cudaFilter(int *evstart,
     cudaCheck(cudaMemcpy( dev_sum2, sum2, tracks*sizeof(float), cudaMemcpyHostToDevice ));
     
     //----------------------------
-    cudaEventRecord(start);
+    cudaEventRecord(gpu_start, 0);
+    cpu_start=mtimes();
     Kalman_Filter<<<dimGrid,dimBlock>>>(dev_ttrack,
                                      dev_trstart,
                                      dev_fullin,
@@ -263,15 +266,16 @@ float cudaFilter(int *evstart,
                                      dev_fullout,
                                      tracks,
                                      hits);
-
-    cudaEventRecord(stop);
-
+    cudaDeviceSynchronize();
+    cpu_stop=mtimes();
+    cudaEventRecord(gpu_stop, 0);
+    cudaEventSynchronize(gpu_stop);
+    cudaEventElapsedTime(&gpu_time, gpu_start, gpu_stop);
+        
     cudaMemcpy(fullout, dev_fullout, 11*tracks*sizeof(float), cudaMemcpyDeviceToHost);
 
-    cudaEventSynchronize(stop);
-    float milliseconds = 0;
-    cudaEventElapsedTime(&milliseconds, start, stop);
-    printf("Kernel execution time = %0.3f ns\n", 1000*milliseconds );
+    printf("Kernel execution time GPU= %0.3f ns\n", gpu_time*1000);
+    printf("Kernel execution time CPU= %0.3lf ns\n", (cpu_stop-cpu_start)*1.0E6);
 
     cudaFree(dev_ttrack);
     cudaFree(dev_evstart);    
