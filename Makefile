@@ -1,19 +1,39 @@
 SHELL := /bin/bash
 
+# First Compilers
+# C++ compiler
 CXX = g++
 CXXFLAGS = -O3 -std=c++11
 
+# C compiler
 CC=gcc
 CFLAGS=-O3 -std=c99
 
 file = good.x bad.x opencl.x opencl2.x
 libs = Good.o Bad.o
 
+# check of cuda compiler
+NVCC_RESULT := $(shell which nvcc 2> /dev/null)
+NVCC_TEST := $(notdir $(NVCC_RESULT))
+ifeq ($(NVCC_TEST),nvcc)
+CUDACC=nvcc
+CUFLAGS=-O3 -std=c++11
+file += cuda.x cuda2.x
+endif
+
 all: $(file)
 
 debug: CXXFLAGS = -O0 -DDEBUG -g -std=c++11 -Wall -DUNIX
 debug: CFLAGS = -O0 -DDEBUG -g -std=c99 -Wall -DUNIX
+debug: CUFLAGS = -O0 -DDEBUG -g -std=c++11 -DUNIX
 debug: $(file)
+
+#---Cuda, this will go inside an if
+Filter_Cuda.o: Filter_Cuda.cu
+	$(CUDACC) $(CUFLAGS) -o $@ -c $^ -DUCUDA=1
+
+Filter_Cuda2.o: Filter_Cuda.cu
+	$(CUDACC) $(CUFLAGS) -o $@ -c $^ -DUCUDA=2
 
 #---OpenCL, this will go inside an if
 PROC_TYPE = $(strip $(shell uname -m | grep 64))
@@ -62,6 +82,12 @@ opencl.x: main.cc Good.cpp Filter_OpenCL.o
 
 opencl2.x: main.cc Good.cpp Filter_OpenCL2.o
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -DUOCL=2 $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL)
+
+cuda.x: main.cc Good.cpp Filter_Cuda.o
+	$(CUDACC) $(CUFLAGS) $^ -o $@ -DGOOD -DUCUDA=1
+
+cuda2.x: main.cc Good.cpp Filter_Cuda2.o
+	$(CUDACC) $(CUFLAGS) $^ -o $@ -DGOOD -DUCUDA=2
 
 %.o: %.cpp Filter.o
 	$(CXX) $(CXXFLAGS) -c $^ -o $@

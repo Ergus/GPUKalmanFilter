@@ -6,17 +6,22 @@
 #include <ctype.h>
 #include "Filter.h"
 
-#if (defined UOCL || defined UOCL2)
-#include "Filter_OpenCL.h"
-#endif
-
 #ifdef UOCL
-#define output "Opencl_states.txt"
-#elif defined UOCL2
-#define output "Opencl_states2.txt"
+  #include "Filter_OpenCL.h"
+  #if UOCL == 1
+    #define output "Opencl_states.txt"
+  #elif UOCL == 2
+    #define output "Opencl_states2.txt"
+  #endif
+#elif defined UCUDA
+  #include "Filter_Cuda.h"
+  #if UCUDA == 1
+    #define output "Cuda_states.txt"
+  #elif UCUDA == 2
+    #define output "Cuda_states2.txt"
+  #endif  
 #else
-#include <time.h>
-#define output "Good_states.txt"
+  #define output "Good_states.txt"
 #endif
 
 class sizes{

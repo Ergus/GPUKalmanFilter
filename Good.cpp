@@ -128,26 +128,45 @@ void sizes::save_results(){
     fclose(fp);
     }
 
-#if (defined UOCL || defined UOCL2)
+#ifdef UOCL
 void sizes::fitKalman(){
-    printf("Filter with OpenCL %d\n", dimension);
+    printf("Filter with OpenCL %d\n", UOCL);
 
     const double begin = mtimes();
     clFilter(event_start,
-                    tracks_start,
-                    statein,
-                    full,
-                    backward,
-                    sum2,
-                    stateout,
-                    nbevts,
-                    nbtracks,
-                    nbhits
-                    );
+             tracks_start,
+             statein,
+             full,
+             backward,
+             sum2,
+             stateout,
+             nbevts,
+             nbtracks,
+             nbhits
+             );
     const double end = mtimes();
     printf("Total time Filtering: %lg s\n\n",end-begin);
     }
 
+#elif defined UCUDA
+void sizes::fitKalman(){
+    printf("Filter with Cuda %d\n", UCUDA);
+
+    const double begin = mtimes();
+    cudaFilter(event_start,
+               tracks_start,
+               statein,
+               full,
+               backward,
+               sum2,
+               stateout,
+               nbevts,
+               nbtracks,
+               nbhits
+               );
+    const double end = mtimes();
+    printf("Total time Filtering: %lg s\n\n",end-begin);
+    }
 #else
 void sizes::fitKalman(){
     printf("Filter with Good method\n");

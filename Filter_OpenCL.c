@@ -248,7 +248,7 @@ float clFilter(int *evstart,
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
     total_time = (time_end - time_start)/1000.0;
 
-    printf("Execution time in milliseconds = %0.3f ns\n", total_time );
+    printf("Kernel execution time = %0.3f ns\n", total_time );
 
     // Read the kernel's output
     clCheck(clEnqueueReadBuffer(queue,
