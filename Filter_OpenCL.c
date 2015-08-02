@@ -27,7 +27,7 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
 
     // Choose a device from the platform according to DEVICE_PREFERENCE
     cl_uint nbdevices[3];
-    const int types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
+    const cl_device_type types[]={CL_DEVICE_TYPE_CPU,CL_DEVICE_TYPE_GPU,CL_DEVICE_TYPE_ACCELERATOR};
     
     #ifdef DEBUG    
     const char devnames[3][10]={"CPU","GPU","Acelerator"};
@@ -43,7 +43,7 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
 
     if (nbdevices[DEVICE_PREFERENCE]>0){
         *devices = (cl_device_id*) malloc(nbdevices[DEVICE_PREFERENCE] * sizeof(cl_device_id));
-        clCheck(clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL));
+        clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL);
         
         #ifdef DEBUG
         fprintf(stderr,"Choosing %s\n",devnames[DEVICE_PREFERENCE]);
