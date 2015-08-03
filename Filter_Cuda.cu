@@ -271,11 +271,13 @@ float cudaFilter(int *evstart,
     cudaEventRecord(gpu_stop, 0);
     cudaEventSynchronize(gpu_stop);
     cudaEventElapsedTime(&gpu_time, gpu_start, gpu_stop);
-        
-    cudaMemcpy(fullout, dev_fullout, 11*tracks*sizeof(float), cudaMemcpyDeviceToHost);
 
-    printf("Kernel execution time GPU= %0.3f ns\n", gpu_time*1000);
-    printf("Kernel execution time CPU= %0.3lf ns\n", (cpu_stop-cpu_start)*1.0E6);
+    printf("Time GPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %e s\n",
+                        method,UCUDA,    events,    tracks,    hits, gpu_time*0.001f );
+    printf("Time CPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %le s\n",
+                        method,UCUDA,    events,    tracks,    hits, (cpu_stop-cpu_start) );
+    
+    cudaMemcpy(fullout, dev_fullout, 11*tracks*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_ttrack);
     cudaFree(dev_evstart);    

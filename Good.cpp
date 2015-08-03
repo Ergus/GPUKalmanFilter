@@ -145,7 +145,8 @@ void sizes::fitKalman(){
              nbhits
              );
     const double end = mtimes();
-    printf("Total time Filtering: %lg s\n\n",end-begin);
+    printf("Time CPU total %s%d Events: %d Tracks: %d Hits: %d = %le s\n\n",
+                       method, UOCL, nbevts,  nbtracks,  nbhits, end - begin );
     }
 
 #elif defined UCUDA
@@ -165,7 +166,8 @@ void sizes::fitKalman(){
                nbhits
                );
     const double end = mtimes();
-    printf("Total time Filtering: %lg s\n\n",end-begin);
+    printf("Time CPU total %s%d Events: %d Tracks: %d Hits: %d = %le s\n\n",
+                     method, UCUDA, nbevts,  nbtracks,  nbhits, end - begin );
     }
 #else
 void sizes::fitKalman(){
@@ -232,6 +234,7 @@ void sizes::fitKalman(){
             }
         }
     const double end = mtimes();
-    printf("Total time Filtering: %lg s\n\n",end - begin);
+    printf("Time CPU total %s Events: %d Tracks: %d Hits: %d = %le s\n\n",
+                        method, nbevts,  nbtracks,  nbhits, end - begin );
     };
 #endif

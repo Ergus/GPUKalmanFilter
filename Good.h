@@ -21,6 +21,7 @@
     #define output "Cuda_states2.txt"
   #endif  
 #else
+  #define method "Good"
   #define output "Good_states.txt"
 #endif
 

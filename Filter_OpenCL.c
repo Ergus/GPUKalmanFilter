@@ -247,8 +247,10 @@ float clFilter(int *evstart,
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(gpu_start), &gpu_start, NULL);
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(gpu_end), &gpu_end, NULL);
 
-    printf("Kernel execution time GPU = %0.3lf ns\n", (double)(gpu_end - gpu_start)/1000.0 );
-    printf("Kernel execution time CPU= %0.3lf ns\n", (cpu_end-cpu_start)*1.0E6 );
+    printf("Time GPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %lg s\n",
+                        method,UOCL,    events,    tracks,    hits, (double)(gpu_end - gpu_start)*1E-9 );
+    printf("Time CPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %lg s\n",
+                        method,UOCL,    events,    tracks,    hits, (cpu_end-cpu_start) );
 
     // Read the kernel's output
     clCheck(clEnqueueReadBuffer(queue,

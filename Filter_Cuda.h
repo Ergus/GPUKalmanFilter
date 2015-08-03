@@ -1,6 +1,8 @@
 #ifndef FILTER_CUDA_H_
 #define FILTER_CUDA_H_ 1
 
+#define method "Cuda"
+
 #ifndef LOCALSIZE
 #define LOCALSIZE 32
 #endif

@@ -1,6 +1,8 @@
 #ifndef FILTER_CL_H_
 #define FILTER_CL_H_ 1
 
+#define method "OpenCl"
+
 #define PROGRAM_FILE "Filter_OpenCL.cl"
 #define KERNEL_FUNC "Kalman_Filter"
 #define dimension UOCL

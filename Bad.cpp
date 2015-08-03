@@ -173,11 +173,11 @@ void Run::filterall(){
         for(int j=0;j<nbtr;j++){            
             State mystate;
             m_events[i].tracks()[j].fitKalman(mystate, backward[i][j] ? 1:-1, sum2[i][j]);
-            m_allstates[i].push_back(mystate);   
-      
+            m_allstates[i].push_back(mystate);      
             }
         }
     const double end = mtimes();
-    printf("Total time Filtering: %lg s\n\n",end - begin);
+    printf("Time CPU total Bad Events: %d Tracks: %d Hits: %d = %le s\n\n",
+                                   nbevts,  nbtracks,  nbhits, end - begin );
     }
 
