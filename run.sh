@@ -1,7 +1,7 @@
 #!/bin/bash
 
 resudir="Results"
-resufile="res_"$(date +"%d_%m_%Y_%H:%M").out
+resufile="res_"$(date +"%d_%m_%Y_%H:%M").res
 
 #Check for Results dir
 if ! [ -d resudir ]; then
