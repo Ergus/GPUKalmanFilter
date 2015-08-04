@@ -11,6 +11,7 @@ CFLAGS=-O3 -std=c99
 
 file = good.x bad.x opencl.x opencl2.x
 libs = Good.o Bad.o
+SRCS = main.cc Filter_Cuda.cu Filter_OpenCL.c 
 
 # check of cuda compiler
 NVCC_RESULT := $(shell which nvcc 2> /dev/null)
@@ -59,13 +60,25 @@ else
 endif
 
 Filter_OpenCL.o: Filter_OpenCL.c
-	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=1
+	$(CC) $(CFLAGS) -o $@ -c $< $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=1
 
 Filter_OpenCL2.o: Filter_OpenCL.c
-	$(CC) $(CFLAGS) -o $@ -c $^ $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=2
+	$(CC) $(CFLAGS) -o $@ -c $< $(INC_DIRS:%=-I%) $(LIB_DIRS:%=-L%) $(LIBS_OCL) -DUOCL=2
 
 #------END OpenCL------------------
+#-------Headers--------------------
+depend: .depend
 
+.depend: $(SRCS)
+	echo "Remaking deppend files"
+	rm -f ./.depend
+	$(CXX) $(CXXFLAGS) -MM main.cc Good.cpp Bad.cpp  >  ./.depend;
+	$(CC) $(CFLAGS) -MM Filter_OpenCL.c >>  ./.depend;
+	$(CUDACC) $(CUFLAGS) -MM Filter_Cuda.cu >> ./.depend;
+
+include .depend
+
+#------ End Headers--------------- 
 good.x: main.cc $(libs)
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD
 
@@ -89,7 +102,7 @@ cuda2.x: main.cc Good.cpp Filter_Cuda2.o
 
 .PHONY: clean
 clean:
-	rm -rf *.x *.o *.txt *.a
+	rm -rf *.x *.o *.txt
 
 .PHONY: test
 test: $(file)
