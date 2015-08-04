@@ -43,7 +43,9 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
 
     if (nbdevices[DEVICE_PREFERENCE]>0){
         *devices = (cl_device_id*) malloc(nbdevices[DEVICE_PREFERENCE] * sizeof(cl_device_id));
-        clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE], nbdevices[DEVICE_PREFERENCE], *devices, NULL);
+        clGetDeviceIDs(*platform, types[DEVICE_PREFERENCE],
+                       nbdevices[DEVICE_PREFERENCE], *devices,
+                       &nbdevices[DEVICE_PREFERENCE]);
         
         #ifdef DEBUG
         fprintf(stderr,"Choosing %s\n",devnames[DEVICE_PREFERENCE]);
@@ -51,7 +53,7 @@ void clChoosePlatform(cl_device_id** devices, cl_platform_id* platform) {
             char name[1024],vendor[1024];
             clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_NAME, sizeof(name), name, NULL));
             clCheck(clGetDeviceInfo((*devices)[i], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL));
-            printf(" %c Device Name = %s, vendor: %s\n", (i==DEVICE_NUMBER?'*':' '),name, vendor);
+            printf(" %c %d Device Name = %s, vendor: %s\n", (i==DEVICE_NUMBER?'*':' '),i,name, vendor);
             }        
         #endif
         }
@@ -158,6 +160,7 @@ float clFilter(int *evstart,
     clChoosePlatform(&devices, &platform);
 
     cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, &err);
+    checkClError(err);
     if(err < 0) {
         perror("Couldn't create a context");
         exit(1);   
@@ -165,6 +168,7 @@ float clFilter(int *evstart,
 
     // Create a command queue
     cl_command_queue queue = clCreateCommandQueue(context, devices[DEVICE_NUMBER], CL_QUEUE_PROFILING_ENABLE, &err);
+    checkClError(err);
     if(err < 0) {
         perror("Couldn't create a command queue");
         exit(1);   
@@ -247,9 +251,9 @@ float clFilter(int *evstart,
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_START, sizeof(gpu_start), &gpu_start, NULL);
     clGetEventProfilingInfo(kernelEvent, CL_PROFILING_COMMAND_END, sizeof(gpu_end), &gpu_end, NULL);
 
-    printf("Time GPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %lg s\n",
+    printf("Time GPU Kernel %s%d Events: %zu Tracks: %zu Hits: %zu = %lg s\n",
                         method,UOCL,    events,    tracks,    hits, (double)(gpu_end - gpu_start)*1E-9 );
-    printf("Time CPU Kernel %s%d Events: %d Tracks: %d Hits: %d = %lg s\n",
+    printf("Time CPU Kernel %s%d Events: %zu Tracks: %zu Hits: %zu = %lg s\n",
                         method,UOCL,    events,    tracks,    hits, (cpu_end-cpu_start) );
 
     // Read the kernel's output

@@ -74,7 +74,7 @@ depend: .depend
 	rm -f ./.depend
 	$(CXX) $(CXXFLAGS) -MM main.cc Good.cpp Bad.cpp  >  ./.depend;
 	$(CC) $(CFLAGS) -MM Filter_OpenCL.c >>  ./.depend;
-	$(CUDACC) $(CUFLAGS) -MM Filter_Cuda.cu >> ./.depend;
+	$(CC) $(CUFLAGS) -MM Filter_Cuda.cu >> ./.depend;
 
 include .depend
 

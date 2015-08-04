@@ -50,11 +50,11 @@ extern "C" {
             }                                                   \
         }
 
-    #define checkClError(errcode) {                   \
-        if (errcode != CL_SUCCESS) {                  \
-            fprintf(stderr,"Error %d\n", errcode);    \
-            exit(-1);                                 \
-            }                                         \
+    #define checkClError(err) {                                        \
+        if (err != CL_SUCCESS) {                                   \
+            fprintf(stderr,"Error %d: %s\n", err,getErrorString(err)); \
+            exit(-1);                                                  \
+            }                                                          \
         }
 
     const char *getErrorString(cl_int error);
