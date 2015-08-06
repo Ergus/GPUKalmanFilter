@@ -36,16 +36,17 @@ __kernel void Kalman_Filter(__constant float* ttrack,
                             __constant int* backward,
                             __constant float* sum2,
                             __global float* fullout,
-                            const unsigned int tracks,
-                            const unsigned int hits){
+                            const unsigned int nbtracks,
+                            const unsigned int nbhits){
 
     //Declared before because it is the most important var
     const int idx = get_global_id(0);
+    const unsigned int tracks=nbtracks, hits=nbhits;
 
     if(idx>=tracks) return;
     #ifdef DEBUG
     if(idx==0)
-        printf("Using kernel 1 for OpenCL for %d tracks\n",tracks);
+        printf("Using kernel 1 for OpenCL for tracks\n");
     #endif
     
     int first = trstart[idx],
@@ -134,18 +135,20 @@ __kernel void Kalman_Filter(__constant float* ttrack,
                             __constant int* backward,
                             __constant float* sum2,
                             __global float* fullout,
-                            const unsigned int tracks,
-                            const unsigned int hits){
+                            const unsigned int nbtracks,
+                            const unsigned int nbhits){
 
     //Declared before because it is the most important var
     const int idx = get_global_id(0);
+    const unsigned int tracks=nbtracks, hits=nbhits;
+    
     if(idx>=tracks) return;
     
     const int idy = get_global_id(1);
 
     #ifdef DEBUG
     if((idx==0) && (idy==0))
-        printf("Using kernel 2 for OpenCL for %d tracks\n",tracks);
+        printf("Using kernel 2 for OpenCL for tracks\n");
     #endif
     
     int first = trstart[idx],

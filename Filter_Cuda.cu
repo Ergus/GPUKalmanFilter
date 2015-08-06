@@ -37,27 +37,37 @@ __global__ void Kalman_Filter(float* ttrack,
                             int* backward,
                             float* sum2,
                             float* fullout,
-                            const unsigned int tracks,
-                            const unsigned int hits){
+                            const unsigned int nbtracks,
+                            const unsigned int nbhits){
 
     //Declared before because it is the most important var
     const int idx = blockIdx.x*blockDim.x+threadIdx.x;
-
-    if(idx>=tracks) return;
     
+    const unsigned int tracks=nbtracks, hits=nbhits;
+    
+    if(idx>=tracks) return;
+
     #if (defined DEBUG && __CUDA_ARCH__ >= 200)
     if(idx==0)
-        printf("Using kernel 1 for Cuda for %d tracks\n",tracks);
+        printf("Using kernel 1 for Cuda for %u tracks\n",tracks);
     #endif
     
     int first = trstart[idx],
         last = trstart[idx+1],
         direction = (backward[idx] ? 1 : -1),
-        dhit, size=last-first-1;
+        dhit;
+    const int size=last-first-1;
     const float noise2PerLayer=sum2[idx];
     
     float ax[24],ay[24],
         az[24],aerrx[24],aerry[24];
+    
+    // initialize the covariance matrix
+    float covXTx  = 0.0f,  // no initial correlation
+          covYTy  = 0.0f,
+          covTxTx = 1.0f,  // randomly large error
+          covTyTy = 1.0f,
+             chi2 = 0.0f;
 
     for(int i=first, j=0;i<last;i++, j++){
         ax[j]   = fullin[i];
@@ -86,14 +96,8 @@ __global__ void Kalman_Filter(float* ttrack,
         wx = aerrx[first],
         wy = aerry[first];
     
-    // initialize the covariance matrix
-    float covXTx  = 0.0f;  // no initial correlation
-    float covYTy  = 0.0f;
-    float covTxTx = 1.0f;  // randomly large error
-    float covTyTy = 1.0f;
-    float covXX = 1.0f /(wx*wx);
-    float covYY = 1.0f /(wy*wy);
-    float chi2=0.0f;
+    float covXX = 1.0f /(wx*wx),
+          covYY = 1.0f /(wy*wy);
     
     for (int i=first+dhit; i!=last; i+=dhit) {    
         wx=aerrx[i];
@@ -136,17 +140,19 @@ __global__ void Kalman_Filter(float* ttrack,
                               int* backward,
                               float* sum2,
                               float* fullout,
-                              const unsigned int tracks,
-                              const unsigned int hits){
+                              const unsigned int nbtracks,
+                              const unsigned int nbhits){
 
     //Declared before because it is the most important var
     const int idx = blockIdx.x*blockDim.x+threadIdx.x;
+    const unsigned int tracks=nbtracks,
+                         hits=nbhits;
     if(idx>=tracks) return;
     
     const int idy = blockIdx.y*blockDim.y+threadIdx.y;
     #if (defined DEBUG && __CUDA_ARCH__ >= 200)
     if((idx==0) && (idy==0))
-        printf("Using kernel 2 for Cuda for %d tracks\n",tracks);
+        printf("Using kernel 2 for Cuda for %u tracks\n",tracks);
     #endif
     
     int first = trstart[idx],
