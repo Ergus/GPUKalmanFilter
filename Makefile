@@ -9,7 +9,7 @@ CXXFLAGS = -O3 -std=c++11
 CC=gcc
 CFLAGS=-O3 -std=c99
 
-file = good.x bad.x opencl.x opencl2.x
+file = good.x bad.x bad_good.x opencl.x opencl2.x
 libs = Good.o Bad.o
 SRCS = main.cc Filter_Cuda.cu Filter_OpenCL.c 
 
@@ -78,11 +78,14 @@ depend: .depend
 
 include .depend
 
-#------ End Headers--------------- 
-good.x: main.cc $(libs)
+#------ End Headers---------------
+bad_good.x: main.cc Good.cpp Bad.cpp
+	$(CXX) $(CXXFLAGS) $^ -o $@ -DBAD_GOOD
+
+good.x: main.cc Good.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD
 
-bad.x: main.cc $(libs)
+bad.x: main.cc Bad.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DBAD
 
 opencl.x: main.cc Good.cpp Filter_OpenCL.o

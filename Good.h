@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "Filter.h"
+#include "Bad.h"
 
 #ifdef UOCL
   #include "Filter_OpenCL.h"
@@ -19,7 +20,10 @@
     #define output "Cuda_states.txt"
   #elif UCUDA == 2
     #define output "Cuda_states2.txt"
-  #endif  
+  #endif
+#elif defined BAD_GOOD
+  #define method "Bad_Good"
+  #define output "BG_states.txt"
 #else
   #define method "Good"
   #define output "Good_states.txt"
@@ -27,6 +31,7 @@
 
 class sizes{
     public:
+        sizes(Run &run);
         sizes(const char fn[]);
         ~sizes();
         void print();
@@ -55,7 +60,8 @@ class sizes{
         // This is one array containing x,y,z,wxerr,wyerr
         // 1/hit
         float *full;
-
+        void allocate();
+        double cumtime;
     };
 
 #endif

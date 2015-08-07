@@ -119,8 +119,7 @@ Run::Run(const char fn[])
         // but only for to be sure when debugging
         if (isalpha(val)){
             if(val=='T'){
-                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",
-                       &read_sum2,&read_backward,&hpt);
+                sscanf(line,"Track: %*d, Sum2: %g, Backward: %d, Hits: %d\n",&read_sum2,&read_backward,&hpt);
                 sum2.back().push_back(read_sum2);
                 backward.back().push_back(read_backward);
                 PrPixelTrack tmptrack(hpt);

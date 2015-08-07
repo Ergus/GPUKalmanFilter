@@ -1,6 +1,9 @@
 
 #include "Serializer.h"
-#ifdef GOOD
+#ifdef BAD_GOOD
+    #define thistest "Bad_Good"
+    #include "Good.h"
+#elif defined GOOD
     #define thistest "Good"
     #include "Good.h"
 #elif defined(BAD)
@@ -20,17 +23,23 @@ int main(int argc, char **argv){
         }
 
     printf("Test for %s\n",thistest);
-#ifdef GOOD
-    sizes size(argv[1]);
+    
+#if (defined BAD_GOOD) || (defined GOOD)
+    #ifdef GOOD
+      sizes size(argv[1]);
+    #elif defined BAD_GOOD
+      Run run(argv[1]);
+      sizes size(run);
+    #endif
+      
     size.fitKalman();
-    size.save_results();
+    size.save_results();    
     
 #elif defined(BAD)
     Run run(argv[1]);
     Serializer ser("Bad_states.txt");
     run.filterall();
     ser(run);
-
 #endif
     return 0;
     }

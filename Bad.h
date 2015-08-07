@@ -18,6 +18,7 @@
 #include "Filter.h"
 
 class Serializer;
+class sizes;
 
 //============ Hits ==============
 
@@ -95,6 +96,7 @@ class PrPixelTrack {
         float m_tx, m_ty, m_x0, m_y0;  
 
         friend class serializer;
+        friend class sizes;
     };
     /// vector of tracks
     typedef std::vector<PrPixelTrack> PrPixelTracks;  
@@ -142,6 +144,7 @@ class Run{
         vector<vector<float> > sum2;
         vector<vector<bool> > backward;
         friend Serializer;
+        friend sizes;
     };
 
 //============= End Run ===============
