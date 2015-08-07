@@ -100,19 +100,25 @@ cuda.x: main.cc Good.cpp Filter_Cuda.o
 cuda2.x: main.cc Good.cpp Filter_Cuda2.o
 	$(CUDACC) $(CUFLAGS) $^ -o $@ -DGOOD -DUCUDA=2
 
-%.o: %.cpp Filter.o
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+#Next rule create a test input with only 3 events
+test.dat: in_dat.tar.gz
+	if ! [ -a  in.dat ]; then \
+		echo "Extracting tar.gz file, this will be made only the first time"; \
+		tar -xvzf in_dat.tar.gz; \
+		fi
+	echo "Creating file test.dat this will be made only one time"
+	awk '$$1=="Event:"{cont++}{if(cont<4){print $0}else{exit 0}}' in.dat > $@
 
 .PHONY: clean
 clean:
 	rm -rf *.x *.o *.txt
 
 .PHONY: test
-test: $(file)
+test: $(file) test.dat
 	for a in $(file); do ./$$a test.dat; done
 
 .PHONY: check
-check: $(file)
+check: $(file) test.dat
 	rm -rf *.txt
 	for a in $(file); do ./$$a test.dat; done
 	for a in *.txt; do \
