@@ -62,15 +62,25 @@ plot for [i=1:2] sprintf(plotGPU,word(GPUs,i),floop) t "loop ".word(GPUs,i) w li
 #------------------------------------------------
 ### Speed Up Serial Code###########
 ### Speedup for the CPU serial codes ####
-plotSU = "<awk '$4==\"%s\"||$4==\"Bad\"&&/Time/&&/CPU/{if($4==\"Bad\"){bad[bc++]=$12}else{good[gc++]=$12;x[xc++]=$8}}END{for(i=0;i<xc;i++){print x[i], bad[i]/good[i]}}' Results/lab14_07_08_2015_bad_good.res
+plotSU = "<awk '$4==\"%s\"||$4==\"Bad\"&&/Time/&&/CPU/{if($4==\"Bad\"){bad[bc++]=$12}else{good[gc++]=$12;x[xc++]=$8}}END{for(i=0;i<xc;i++){print x[i], bad[i]/good[i]}}' %s"
 
 set output '|epstopdf --filter --outfile=Graphs/SU_Serial_Code.pdf'
 set key right top
-set title "SpeedUp vs Number of Tracks from 1 to 300 events"
+set title "SpeedUp vs Number of Tracks from 1 to 300 events serial code"
 set xlabel "Tracks"
 set ylabel "SpeedUp"
 
-plot for [i=2:words(serials)] sprintf(plotSU,word(serials,i)) t word(titles1,i) w linespoints pt 7 lw 0.5 ps 0.75
+plot for [i=2:words(serials)] sprintf(plotSU,word(serials,i),fbadgood) t word(titles1,i) w linespoints pt 7 lw 0.5 ps 0.75
 
-#------------------------------------------------
+### Speed Up OpenCl Code###########
+### Speedup for the CPU serial codes ####
 
+plotSU2 = "<awk '($4==\"Bad\"&&/total/){bad[bc++]=$12};/CPU/&&($4==\"%s\"&&/Kernel/){good[gc++]=$12;x[xc++]=$8}END{for(i=0;i<xc;i++){print x[i], bad[i]/good[i]}}' %s"
+
+set output '|epstopdf --filter --outfile=Graphs/SU_OpenCl_Code.pdf'
+set key left top
+set title "SpeedUp vs Number of Tracks from 1 to 300 events OpenCl on CPU"
+set xlabel "Tracks"
+set ylabel "SpeedUp"
+
+plot for [i=1:2] sprintf(plotSU2,word(GPUs,i),fcpu) t word(GPUs,i) w linespoints pt 7 lw 0.5 ps 0.75
