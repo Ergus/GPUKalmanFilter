@@ -25,8 +25,15 @@
   #define method "Bad_Good"
   #define output "BG_states.txt"
 #else
-  #define method "Good"
-  #define output "Good_states.txt"
+  #ifdef _OPENMP
+    #include <omp.h>
+    #define output "OMP_states.txt"
+    #define method "OMP"
+  #else
+    #define omp_get_thread_num() 0
+    #define output "Good_states.txt"
+    #define method "Good"
+  #endif
 #endif
 
 class sizes{

@@ -9,7 +9,7 @@ CXXFLAGS = -O3 -std=c++11
 CC=gcc
 CFLAGS=-O3 -std=c99
 
-file = good.x bad.x bad_good.x opencl.x opencl2.x
+file = good.x bad.x bad_good.x opencl.x opencl2.x openmp.x
 libs = Good.o Bad.o
 SRCS = main.cc Filter_Cuda.cu Filter_OpenCL.c 
 
@@ -84,6 +84,9 @@ bad_good.x: main.cc Good.cpp Bad.cpp
 
 good.x: main.cc Good.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD
+
+openmp.x: main.cc Good.cpp
+	$(CXX) $(CXXFLAGS) $^ -o $@ -DGOOD -fopenmp
 
 bad.x: main.cc Bad.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ -DBAD

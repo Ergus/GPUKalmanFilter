@@ -216,10 +216,13 @@ void sizes::fitKalman(){
 void sizes::fitKalman(){
     printf("Filter with %s method\n",method);
     const double begin = mtimes();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for(int i=0;i<nbevts;i++){
         int evstart=event_start[i],
             evtend =event_start[i+1];
-        for(int j=evstart,cont=0;j<evtend;j++,cont++){
+        for(int j=evstart;j<evtend;j++){
             int trstart=tracks_start[j],
                 trend=tracks_start[j+1]-1,
                 direction=(backward[j]?1:-1),

@@ -6,6 +6,7 @@ floop = "Results/lab14_06_08_2015_loop.res"
 fbadgood = "Results/lab14_07_08_2015_bad_good.res"
 fcpu = "Results/lab14_07_08_2015_cpu_loop.res"
 fpointer = "Results/lab14_07_08_2015_pointer.res"
+fomp = "Results/lab14_17_08_2015_OMP.res"
 ### Arrays
 serials = "Bad Good Bad_Good"
 titles1 = "AOS SOA SOA+conversion"
@@ -24,6 +25,12 @@ plotCPU = "<awk '$4==\"%s\"&&/Time/&&/CPU/{print $8,$12}' %s"
 set output '|epstopdf --filter --outfile=Graphs/Time_Serial_Code.pdf'
 
 plot for [i=1:words(serials)] sprintf(plotCPU,word(serials,i),fbadgood) t word(titles1,i) w linespoints pt 7 lw 0.5 ps 0.75
+
+## Test graph using OpenMP, not to include in the repository
+set output '|epstopdf --filter --outfile=Graphs/Time_OMP_Code.pdf'
+
+plot for [i=1:words(serials)] sprintf(plotCPU,word(serials,i),fomp) t word(titles1,i) w linespoints pt 7 lw 0.5 ps 0.75,\
+     sprintf(plotCPU,"OMP",fomp) t word(titles1,i) w linespoints pt 7 lw 0.5 ps 0.75
 
 ### GPU times#####################
 ### This is Cuda and OpenCL running on GPU with copy implementation only.
