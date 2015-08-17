@@ -217,7 +217,7 @@ void sizes::fitKalman(){
     printf("Filter with %s method\n",method);
     const double begin = mtimes();
 #ifdef _OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for
 #endif
     for(int i=0;i<nbevts;i++){
         int evstart=event_start[i],
