@@ -129,4 +129,9 @@ check: $(file) test.dat
 		echo "Made diff to: " $$a; \
 		read -p "Press [Enter] key to diff next file..."; \
 		done
+Graphs:
+	mkdir Graphs
 
+.PHONY: graphs
+graphs: Graphs
+	gnuplot gnuplot.plt

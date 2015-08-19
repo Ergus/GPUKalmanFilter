@@ -19,6 +19,7 @@ There are some commands implemented in the Makefile to make the live easy:
  * make test: run a simple test that prints the output on screen for all the compiled programs (*.x)
  * make check: makes a clean and run a test. Then make diff to the outputs comparing with the original output (Bad.x).
  * make clean: ...
+ * make graphs: Create the graphs with gnuplot using the results in the directory "Results" and save them in "Graphs".
  
 ### Other scripts ###
 
